@@ -1,0 +1,108 @@
+/* cmdqs = "Case Management Demo Quick Stats" */
+
+.cmdqs_main_class { /*irs_main_class*/
+	border-color: grey;
+	border-style: solid;
+	border-width: 1px;
+	color: black;
+}
+
+.cmdqs_fonts {	/*irs_fonts*/
+	font-family: 'Lucida Grande', Arial, Helvetica, Geneva, sans-serif;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+}
+
+.cmdqs_main_title {/*tasks_title*/
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	padding: 5px !important;
+	border-bottom-style: solid;
+	border-bottom-color: grey;/* same as cmdqs_main_class */
+	border-width: 1px;
+	
+	font-size: 15px;
+	font-weight: bold;
+}
+
+.summary_stats {
+	border-color: grey;
+	height: 15px;
+	padding: 3px;
+	background-color: lightgrey;
+}
+
+.summary_subdiv {
+	height: 20px;
+	float: left;
+}
+
+.no_productorders {
+	text-align: center;
+	height: 35px;
+	line-height: 35px;
+}
+
+.cmdqs_one_result_container {
+	background-color: #ececec;
+	border-color: white;
+}
+
+.cmdqs_total_container {
+	background: #fff;
+	color:#626262;
+	text-transform:uppercase;
+	border-color: white;
+}
+
+.cmdqs_main_result {
+	padding: 5px;
+	height: 25px;
+	line-height: 25px;
+	text-align: center;
+	font-size: 125%;
+
+	background: #fff;
+	color:#626262;
+	text-transform:uppercase;
+}
+
+.cmdqs_sub_result {
+	padding: 5px;
+	height: 20px;
+	line-height: 20px;
+	/*position: fixed;*/
+}
+
+.cmdqs_total {
+	height: 25px;
+	line-height: 25px;
+	/*background-color: grey;*/
+	color: white;
+}
+
+.cmdqs_new,
+.cmdqs_processing,
+.cmdqs_ready {
+	font-weight: bold;
+}
+
+.cmdqs_new {
+	background-color: #ffd800;
+	color: #ad7000;
+}
+
+.cmdqs_processing {
+	background-color: #4ebdf0;
+	color: #00354e;
+}
+
+.cmdqs_ready {
+	background-color: #a2f04e;
+	color: #2a5100;
+}
+
+
+/* --EOF-- */

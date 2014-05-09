@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.nuxeo</groupId>
+    <artifactId>nuxeo-addons-parent</artifactId>
+    <version>5.9.3-SNAPSHOT</version>
+  </parent>
+  <groupId>org.nuxeo.cm.demo</groupId>
+  <artifactId>nuxeo-cm-demo-parent</artifactId>
+  <name>Parent project for the Case Management Demo Plug-in</name>
+  <packaging>pom</packaging>
+  <description/>
+  <modules>
+    <module>nuxeo-cm-demo-utils</module>
+    <module>nuxeo-cm-demo-utils-mp</module>
+  </modules>
+  <properties>
+    <nuxeo.cm.demo.version>5.9.3-SNAPSHOT</nuxeo.cm.demo.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+    <dependency>
+      <groupId>org.nuxeo.cm.demo</groupId>
+      <artifactId>nuxeo-cm-demo-utils</artifactId>
+      <version>${nuxeo.cm.demo.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.nuxeo.cm.demo</groupId>
+      <artifactId>nuxeo-cm-demo-utils-mp</artifactId>
+      <version>${nuxeo.cm.demo.version}</version>
+    </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>nuxeo-studio</id>
+      <url>https://connect.nuxeo.com/nuxeo/site/studio/maven</url>
+      <releases>
+          <enabled>true</enabled>
+      </releases>
+      <snapshots>
+          <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+</project>
