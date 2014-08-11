@@ -20,6 +20,7 @@
   <supported>false</supported>
   <platforms>
     <platform>cap-@VERSION@</platform>
+    <platform>cap-5.9.5</platform>
     <platform>cap-5.8</platform>
   </platforms>
   <!-- Dependencies on other packages -->
