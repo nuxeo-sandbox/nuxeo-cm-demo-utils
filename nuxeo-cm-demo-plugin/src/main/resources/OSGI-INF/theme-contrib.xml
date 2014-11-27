@@ -21,7 +21,7 @@
   <extension target="org.nuxeo.theme.services.ThemeService" point="resources">
     <resource name="cm-demo-quickstats-widget.js">
       <path>scripts/cm-demo-quickstats-widget.js</path>
-	  <require>jquery.js</require>
+      <require>jquery.js</require>
     </resource>
   </extension>
 

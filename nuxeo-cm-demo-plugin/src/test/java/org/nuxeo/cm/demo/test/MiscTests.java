@@ -51,13 +51,12 @@ public class MiscTests {
     @Inject
     CoreSession coreSession;
 
-	@Inject
+    @Inject
     AutomationService service;
 
     @Test
     public void testRandomFirstLastNames() throws Exception {
 
     }
-
 
 }

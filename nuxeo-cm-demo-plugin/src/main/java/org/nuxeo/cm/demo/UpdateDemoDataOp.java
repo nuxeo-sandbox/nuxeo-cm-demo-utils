@@ -26,7 +26,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 /**
  * @author Thibaud Arguillere
  */
-@Operation(id=UpdateDemoDataOp.ID, category=Constants.CAT_SERVICES, label="Update Demo Data", description="UPdates the demo data: change the dates, etc. Make sure you are logged in with enought right for this")
+@Operation(id = UpdateDemoDataOp.ID, category = Constants.CAT_SERVICES, label = "Update Demo Data", description = "UPdates the demo data: change the dates, etc. Make sure you are logged in with enought right for this")
 public class UpdateDemoDataOp {
 
     public static final String ID = "UpdateDemoData";
@@ -37,7 +37,7 @@ public class UpdateDemoDataOp {
     @OperationMethod
     public void run() throws Exception {
 
-        UpdateDemoData  udd = new UpdateDemoData(session);
+        UpdateDemoData udd = new UpdateDemoData(session);
 
         udd.run();
     }

@@ -27,9 +27,8 @@
 	line-height: 25px;
 	text-align: center;
 	border-bottom-style: solid;
-	border-bottom-color: grey;/* same as cmdqs_main_class */
+	border-bottom-color: grey; /* same as cmdqs_main_class */
 	border-width: 1px;
-	
 	font-size: 15px;
 	font-weight: bold;
 }
@@ -59,8 +58,8 @@
 
 #cm_demo_quickstats .cmdqs_total_container {
 	background: #fff;
-	color:#626262;
-	text-transform:uppercase;
+	color: #626262;
+	text-transform: uppercase;
 	border-color: white;
 }
 
@@ -69,15 +68,14 @@
 	line-height: 25px;
 	text-align: center;
 	font-size: 125%;
-
 	background: #fff;
-	color:#626262;
-	text-transform:uppercase;
+	color: #626262;
+	text-transform: uppercase;
 }
 
 #cm_demo_quickstats .cmdqs_one_bar {
 	padding: 5px 0px;
-	height: 20px;	
+	height: 20px;
 	line-height: 20px;
 }
 
@@ -90,12 +88,10 @@
 #cm_demo_quickstats .cmdqs_total {
 	height: 25px;
 	line-height: 25px;
-	color:#626262;
+	color: #626262;
 }
 
-.cmdqs_pastDue,
-.cmdqs_done,
-.cmdqs_onSchedule {
+.cmdqs_pastDue, .cmdqs_done, .cmdqs_onSchedule {
 	font-weight: bold;
 }
 
@@ -113,6 +109,5 @@
 	background-color: #a2f04e;
 	color: #2a5100;
 }
-
 
 /* --EOF-- */

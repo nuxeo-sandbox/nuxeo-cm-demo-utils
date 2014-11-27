@@ -1,8 +1,8 @@
 <component name="org.nuxeo.cm.demo.utils.UpdateDemoDataOp">
 
   <extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"
-    point="operations" >
-      <operation class="org.nuxeo.cm.demo.utils.UpdateDemoDataOp" />
-   </extension>
-    
+    point="operations">
+    <operation class="org.nuxeo.cm.demo.utils.UpdateDemoDataOp" />
+  </extension>
+
 </component>

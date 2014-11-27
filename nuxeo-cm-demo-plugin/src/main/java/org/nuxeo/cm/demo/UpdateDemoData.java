@@ -41,67 +41,60 @@ import org.nuxeo.runtime.api.Framework;
  *
  * @since 5.9.2
  *
- * This class takes the InsuranceClaim and update them so the demo looks better.
- * For example, when the data is reset every night from the same original backup,
- * you find yourself with claims created beginning of 2013 while you are in 2014
- * and you want stats from "the last month" => you will find nothing (or just the
- * 1-2 cases you created during the demo)
- * We update all data and set the dates to a random date form the last 3 months,
- * with a bit more for the last month.
+ *        This class takes the InsuranceClaim and update them so the demo looks
+ *        better. For example, when the data is reset every night from the same
+ *        original backup, you find yourself with claims created beginning of
+ *        2013 while you are in 2014 and you want stats from "the last month" =>
+ *        you will find nothing (or just the 1-2 cases you created during the
+ *        demo) We update all data and set the dates to a random date form the
+ *        last 3 months, with a bit more for the last month.
  *
- * ============================================================
- * IMPORTANT
- * ============================================================
- *   1/ We don't want workflows to be started, mails to be sent, etc. So, to avoid
- *      some event handlers defined in the Studio project to be triggered, we use
- *      the following strategy:
- *          - The code defines a contextData property for the document:
- *                  oneDoc.putContextData("UpdatingData_NoEventPlease", true);
- *          - In the project, the event handlers that must *not* be triggered when
- *            updating the data have the following EL condition:
- *            Document.doc.getContextData("UpdatingData_NoEventPlease") == null
+ *        ============================================================ IMPORTANT
+ *        ============================================================ 1/ We
+ *        don't want workflows to be started, mails to be sent, etc. So, to
+ *        avoid some event handlers defined in the Studio project to be
+ *        triggered, we use the following strategy: - The code defines a
+ *        contextData property for the document:
+ *        oneDoc.putContextData("UpdatingData_NoEventPlease", true); - In the
+ *        project, the event handlers that must *not* be triggered when updating
+ *        the data have the following EL condition:
+ *        Document.doc.getContextData("UpdatingData_NoEventPlease") == null
  *
- *   2/ We create (if needed) a "nice claim" ( a claim with more info, so we can
- *      use the Template Rendering plug-in to display the case as pdf.
- *      => THE CODE CREATES IT IN  "/Insurance Claims/Claims"
- *      => These domain/folder *mus* exist.
+ *        2/ We create (if needed) a "nice claim" ( a claim with more info, so
+ *        we can use the Template Rendering plug-in to display the case as pdf.
+ *        => THE CODE CREATES IT IN "/Insurance Claims/Claims" => These
+ *        domain/folder *mus* exist.
  *
- * ============================================================
- * THIS CODE HANDLES THE FOLLOWING:
- * ============================================================
- *      dc:created
- *          Half of the claims in the past month
- *              If a claim is "Archived", creation date is set between 15-30 days ago
- *          The other half: 2-3 months ago
+ *        ============================================================ THIS CODE
+ *        HANDLES THE FOLLOWING:
+ *        ============================================================
+ *        dc:created Half of the claims in the past month If a claim is
+ *        "Archived", creation date is set between 15-30 days ago The other
+ *        half: 2-3 months ago
  *
- *      dc:modified
- *      dc:lastContributor
- *      dc:contributors
- *          These one, thanks to the act that it is possible to disable the dublincore
- *          listener. In this code, we disable it for each document:
- *          oneDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
- *          (this is a super great feature)
+ *        dc:modified dc:lastContributor dc:contributors These one, thanks to
+ *        the act that it is possible to disable the dublincore listener. In
+ *        this code, we disable it for each document:
+ *        oneDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
+ *        true); (this is a super great feature)
  *
- *      incl:contract_start/incl:contract_end
- *          One year, and "today" is in this range
+ *        incl:contract_start/incl:contract_end One year, and "today" is in this
+ *        range
  *
- *      incl:date_opened is the creation data
+ *        incl:date_opened is the creation data
  *
- *      incl:due_date
- *          Same as Studio rule (cf. chain IC-AC-Claim-OnDocumentCreated)
+ *        incl:due_date Same as Studio rule (cf. chain
+ *        IC-AC-Claim-OnDocumentCreated)
  *
- *      incl:date_closed
- *          Only if the claim is archived
- *          Set to 0-5 days ago
+ *        incl:date_closed Only if the claim is archived Set to 0-5 days ago
  *
- *      dc:title
- *          Updated to reflect the changes in the creation date
- *          WARNING: the path cannot be changed, but it is ok.
+ *        dc:title Updated to reflect the changes in the creation date WARNING:
+ *        the path cannot be changed, but it is ok.
  *
- * ============================================================
- * IT DOES NOT HANDLE:
- * ============================================================
- *      Dates of workflows (due dates of tasks for example)
+ *        ============================================================ IT DOES
+ *        NOT HANDLE:
+ *        ============================================================ Dates of
+ *        workflows (due dates of tasks for example)
  *
  */
 public class UpdateDemoData {
@@ -111,28 +104,42 @@ public class UpdateDemoData {
     static protected final int kSAVE_SESSION_MODULO = 25;
 
     // Acting as a constant. Not handling "deleted".
-    static protected  Map<String, Integer> _kSTATES = null;
+    static protected Map<String, Integer> _kSTATES = null;
+
     static protected final int kLFS_RECEIVED = 0;
+
     static protected final int kLFS_CHECK_CONTRACT = 1;
-    static protected final int kLFS_OPENED= 2;
+
+    static protected final int kLFS_OPENED = 2;
+
     static protected final int kLFS_COMPLETED = 3;
+
     static protected final int kLFS_EXPERT_ON_SITE_NEEDED = 4;
+
     static protected final int kLFS_EVALUATED = 5;
+
     static protected final int kLFS_DECISION_MADE = 6;
-    static protected final int kLFS_ARCHIVED= 7;
+
+    static protected final int kLFS_ARCHIVED = 7;
 
     // This list should be loaded dynamically
-    static protected final String[] kUSERS = {"john", "alan", "kate", "julie", "mike"};
+    static protected final String[] kUSERS = { "john", "alan", "kate", "julie",
+            "mike" };
+
     static protected final int kMAX_FOR_USERS_RANDOM = kUSERS.length - 1;
 
     static private final String kNICE_CLAIM_PARENT_PATH = "/Insurance Claims/Claims";
+
     static private final String kNICE_CLAIM_FIELD = "dc:format";
+
     static private final String kNICE_CLAIM_FIELD_VALUE = "Nice claim for template rendering";
 
     protected DateFormat _yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+
     protected Calendar _today = Calendar.getInstance();
 
     protected CoreSession _session;
+
     protected int _saveCounter = 0;
 
     public UpdateDemoData(CoreSession inSession) {
@@ -146,14 +153,17 @@ public class UpdateDemoData {
 
     private int _randomInt(int inMin, int inMax) {
         // No error check here
-        return inMin + (int)(Math.random() * ((inMax - inMin) + 1));
+        return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
     }
 
     private void _saveDocument(DocumentModel inDoc) throws ClientException {
         _session.saveDocument(inDoc);
 
-        if((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
-            _doLog("Commiting the last " + kSAVE_SESSION_MODULO + " InsuranceClaim (and their children.) Total InsuranceClaim handled: " + _saveCounter);
+        if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
+            _doLog("Commiting the last "
+                    + kSAVE_SESSION_MODULO
+                    + " InsuranceClaim (and their children.) Total InsuranceClaim handled: "
+                    + _saveCounter);
             _session.save();
         }
     }
@@ -187,7 +197,7 @@ public class UpdateDemoData {
         Calendar d = (Calendar) inDate.clone();
 
         d.add(Calendar.DATE, inDays);
-        if(d.after(_today)) {
+        if (d.after(_today)) {
             d = (Calendar) _today.clone();
         }
 
@@ -199,9 +209,10 @@ public class UpdateDemoData {
     // of the dashes-free version, YYYYMMDD), so we must handle that (and remove
     // dashes)
     // Does not save the document, just update the fields
-    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException, ClientException {
+    private void _updateTitle(DocumentModel inDoc, String dateStr)
+            throws PropertyException, ClientException {
         String title = (String) inDoc.getPropertyValue("dc:title");
-        if(title.charAt(4) == '-') {
+        if (title.charAt(4) == '-') {
             title = dateStr.replaceAll("-", "") + title.substring(7);
         } else {
             title = dateStr.replaceAll("-", "") + title.substring(8);
@@ -211,13 +222,14 @@ public class UpdateDemoData {
     }
 
     // Does not save the document
-    private void _updateModificationInfo(DocumentModel inDoc, String inUser, Calendar inDate) throws PropertyException, ClientException {
+    private void _updateModificationInfo(DocumentModel inDoc, String inUser,
+            Calendar inDate) throws PropertyException, ClientException {
         inDoc.setPropertyValue("dc:lastContributor", inUser);
 
         // Handling the list of contributors: The following is a
         // copy/paste from...
-        //  nuxeo-platform-dublincore/src/main/java/org/nuxeo/ecm/
-        //  platform/dublincore/service/DublinCoreStorageService.java
+        // nuxeo-platform-dublincore/src/main/java/org/nuxeo/ecm/
+        // platform/dublincore/service/DublinCoreStorageService.java
         // ... with very little change (no try-catch for example)
         String[] contributorsArray;
         contributorsArray = (String[]) inDoc.getProperty("dublincore",
@@ -239,14 +251,15 @@ public class UpdateDemoData {
     }
 
     /*
-     * Just to try-catch on Thread.sleep, so we don't have to
-     * throw or catch an InterruptedException
+     * Just to try-catch on Thread.sleep, so we don't have to throw or catch an
+     * InterruptedException
      */
     private void _wait(long inMs) {
         try {
             Thread.sleep(inMs);
         } catch (InterruptedException e) {
-            // Should never be here: This thread is not the main threda. No chance!
+            // Should never be here: This thread is not the main threda. No
+            // chance!
         }
     }
 
@@ -255,8 +268,10 @@ public class UpdateDemoData {
      */
     private void _UpdateData() throws Exception {
 
-        // First, we want to delete the "Nice Claim". Because updating it is useless
-        // and also because it generates some "ausitCoreListener" error about the
+        // First, we want to delete the "Nice Claim". Because updating it is
+        // useless
+        // and also because it generates some "ausitCoreListener" error about
+        // the
         // thing not finding the document
         _niceClaimDelete();
 
@@ -274,14 +289,14 @@ public class UpdateDemoData {
         for (DocumentModel oneDoc : allDocs) {
             Calendar aDate, startDate, creationDate, modifDate;
             String creator;
-            int lfs = _lifecycleStateStrToInt( oneDoc.getCurrentLifeCycleState().toLowerCase() );
+            int lfs = _lifecycleStateStrToInt(oneDoc.getCurrentLifeCycleState().toLowerCase());
             String creationDateStr;
 
             // Half in previous month
             creationDate = (Calendar) _today.clone();
-            if(_randomInt(0, 6) >= 3) {
+            if (_randomInt(0, 6) >= 3) {
                 // Depends a bit on the Lifecycle State
-                if(lfs >= kLFS_COMPLETED ) {
+                if (lfs >= kLFS_COMPLETED) {
                     creationDate.add(Calendar.DATE, _randomInt(15, 30) * -1);
                 } else {
                     creationDate.add(Calendar.DATE, _randomInt(0, 30) * -1);
@@ -294,52 +309,55 @@ public class UpdateDemoData {
             oneDoc.setPropertyValue("dc:created", creationDate);
             oneDoc.setPropertyValue("incl:date_received", creationDate);
 
-            // We don't want to build the exact same du_date as the Studio project does
+            // We don't want to build the exact same du_date as the Studio
+            // project does
             // because we want mixed due_date for our JavaScript dashboard
             /*
-            String claimKind = (String) oneDoc.getPropertyValue("incl:incident_kind");
-            if(claimKind.equals("building-fire")) {
-                aDate = _buildDate(creationDate, 90);
-            } else if(claimKind.equals("breakdown")) {
-                aDate = _buildDate(creationDate, 10);
-            } else {
-                aDate = _buildDate(creationDate, 30);
-            }
+             * String claimKind = (String)
+             * oneDoc.getPropertyValue("incl:incident_kind");
+             * if(claimKind.equals("building-fire")) { aDate =
+             * _buildDate(creationDate, 90); } else
+             * if(claimKind.equals("breakdown")) { aDate =
+             * _buildDate(creationDate, 10); } else { aDate =
+             * _buildDate(creationDate, 30); }
              */
-            // Say about 25% are past due (not always: If the case is closed, archived
+            // Say about 25% are past due (not always: If the case is closed,
+            // archived
             // the dashboard does not even look at the due_date)
-            if(_randomInt(1, 4) == 1) {
+            if (_randomInt(1, 4) == 1) {
                 aDate = _buildDate(_today, _randomInt(1, 10) * -1);
             } else {
                 aDate = _buildDate(_today, _randomInt(1, 30));
             }
             oneDoc.setPropertyValue("incl:due_date", aDate);
 
-            creator = kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ];
+            creator = kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)];
             oneDoc.setPropertyValue("dc:creator", creator);
 
             // Update the title and incident_id
             _updateTitle(oneDoc, creationDateStr);
 
             // Opening date of the case to this date, eventually 1-3 days before
-            //"incl:date_received"
+            // "incl:date_received"
             startDate = (Calendar) creationDate.clone();
             int daysBefore = _randomInt(0, 3);
-            if(daysBefore != 0) {
+            if (daysBefore != 0) {
                 startDate.add(Calendar.DATE, daysBefore * -1);
             }
             oneDoc.setPropertyValue("incl:incident_date", startDate);
 
-            // Update contract start/end date. Say a range of one year with today
+            // Update contract start/end date. Say a range of one year with
+            // today
             // in this range
-            aDate = _buildDate(_today,  _randomInt(30, 180) * -1);
+            aDate = _buildDate(_today, _randomInt(30, 180) * -1);
             oneDoc.setPropertyValue("incl:contract_start", aDate);
             aDate.add(Calendar.DATE, 365);
             oneDoc.setPropertyValue("incl:contract_end", aDate);
 
             // If the case is closed, change the date of the closing
-            // We also set the modifDate here because it is == closing date if accurate
-            if(lfs == kLFS_ARCHIVED) {
+            // We also set the modifDate here because it is == closing date if
+            // accurate
+            if (lfs == kLFS_ARCHIVED) {
                 aDate = _buildDate(_today, _randomInt(0, 5) * -1);
                 oneDoc.setPropertyValue("incl:date_closed", aDate);
                 modifDate = (Calendar) aDate.clone();
@@ -347,17 +365,18 @@ public class UpdateDemoData {
                 // Let say it was modified recently...
                 modifDate = _buildDate(_today, _randomInt(0, 10) * -1);
             }
-            _updateModificationInfo(oneDoc, kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ], modifDate);
+            _updateModificationInfo(oneDoc,
+                    kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], modifDate);
 
             // Update first/last names
-            RandomFirstLastName fnln = new RandomFirstLastName( RandomFirstLastName.kMALE_OR_FEMALE );
+            RandomFirstLastName fnln = new RandomFirstLastName(
+                    RandomFirstLastName.kMALE_OR_FEMALE);
             oneDoc.setPropertyValue("pein:first_name", fnln.getFirstName());
             oneDoc.setPropertyValue("pein:last_name", fnln.getLastName());
 
-
             // Now update some info of the children, if any
             DocumentModelList children = _session.getChildren(oneDoc.getRef());
-            for(DocumentModel oneChild : children) {
+            for (DocumentModel oneChild : children) {
                 // Did not dig into the problem, but calling...
                 // oneChild.setPropertyValue("dc:created", creationDate);
                 // ...leads to a "property not found" error. The workaround
@@ -366,36 +385,48 @@ public class UpdateDemoData {
                 oneChild.setProperty("dublincore", "creator", creator);
                 aDate = _buildDate(creationDate, _randomInt(0, 10));
                 oneChild.setProperty("dublincore", "modified", aDate);
-                oneChild.setProperty("dublincore", "lastContributor", kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ]);
+                oneChild.setProperty("dublincore", "lastContributor",
+                        kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)]);
                 _session.saveDocument(oneChild);
 
-                // Don't want to handle MailFolder (which is, actually, not used in the demo)
+                // Don't want to handle MailFolder (which is, actually, not used
+                // in the demo)
                 // We also don't handle recursivity, sub-sub-folders, etc.
-                if(oneChild.isFolder() && oneChild.getType().toLowerCase().indexOf("mail") < 0) {
+                if (oneChild.isFolder()
+                        && oneChild.getType().toLowerCase().indexOf("mail") < 0) {
                     DocumentModelList grandChildren = _session.getChildren(oneChild.getRef());
-                    for(DocumentModel oneGrandChild : grandChildren) {
-                        if(oneChild.isFolder()) {
-                            oneGrandChild.setPropertyValue("dc:created", creationDate);
+                    for (DocumentModel oneGrandChild : grandChildren) {
+                        if (oneChild.isFolder()) {
+                            oneGrandChild.setPropertyValue("dc:created",
+                                    creationDate);
                             // Nothing more
                         } else {
                             aDate = (Calendar) creationDate.clone();
                             aDate.add(Calendar.DATE, _randomInt(0, 30));
-                            if(aDate.after(_today)) {
+                            if (aDate.after(_today)) {
                                 aDate = (Calendar) _today.clone();
                                 aDate.add(Calendar.DATE, _randomInt(0, 3) * -1);
                             }
                             oneGrandChild.setPropertyValue("dc:created", aDate);
-                            oneGrandChild.setProperty("dublincore", "creator", creator);
-                            oneGrandChild.setProperty("dublincore", "modified", creationDate);
-                            oneGrandChild.setProperty("dublincore", "lastContributor", kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ]);
-                            oneGrandChild.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+                            oneGrandChild.setProperty("dublincore", "creator",
+                                    creator);
+                            oneGrandChild.setProperty("dublincore", "modified",
+                                    creationDate);
+                            oneGrandChild.setProperty(
+                                    "dublincore",
+                                    "lastContributor",
+                                    kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)]);
+                            oneGrandChild.putContextData(
+                                    DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
+                                    true);
                         }
                         _session.saveDocument(oneGrandChild);
                     }
                 }
             }
 
-            oneDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+            oneDoc.putContextData(
+                    DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
             // Make sure events are not triggered
             oneDoc.putContextData("UpdatingData_NoEventPlease", true);
             _saveDocument(oneDoc);
@@ -419,10 +450,11 @@ public class UpdateDemoData {
     protected DocumentModelList _niceClaimQuery() throws ClientException {
         String nxql;
 
-        nxql= "SELECT * FROM InsuranceClaim";
+        nxql = "SELECT * FROM InsuranceClaim";
         nxql += " WHERE ecm:isCheckedInVersion = 0";
         nxql += " AND ecm:currentLifeCycleState = 'DecisionMade'";
-        nxql += " AND " + kNICE_CLAIM_FIELD + " = '" + kNICE_CLAIM_FIELD_VALUE + "'";
+        nxql += " AND " + kNICE_CLAIM_FIELD + " = '" + kNICE_CLAIM_FIELD_VALUE
+                + "'";
 
         return _session.query(nxql);
     }
@@ -431,9 +463,9 @@ public class UpdateDemoData {
         DocumentModelList allDocs = _niceClaimQuery();
 
         int count = allDocs.size();
-        if(count != 0) {
+        if (count != 0) {
             _doLog("Deleting previous Nice claim(s)...");
-            for(int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 _session.removeDocument(allDocs.get(i).getRef());
             }
             _session.save();
@@ -441,16 +473,15 @@ public class UpdateDemoData {
         }
     }
 
-    /*  ============================================================
-        Create a nice case
-        ============================================================
-        Create a full, completed claim that will be used to show the template rendering
-        To identify the nice claim, we have a ugly trick: We store an information
-        in the kNICE_CLAIM_FIELD field.
-        We delete an existing one if any, to rebuild it.
-        We wait one second before each modification when changing the lifecycle state
-        so the audit log will be correctly sort. This means creating the nice claim
-        takes basically all the time ;-).
+    /*
+     * ============================================================ Create a
+     * nice case ============================================================
+     * Create a full, completed claim that will be used to show the template
+     * rendering To identify the nice claim, we have a ugly trick: We store an
+     * information in the kNICE_CLAIM_FIELD field. We delete an existing one if
+     * any, to rebuild it. We wait one second before each modification when
+     * changing the lifecycle state so the audit log will be correctly sort.
+     * This means creating the nice claim takes basically all the time ;-).
      */
     protected void _niceClaimCreate() throws Exception {
         Calendar aDate, creationDate;
@@ -463,10 +494,10 @@ public class UpdateDemoData {
 
         DocumentModelList allDocs = _niceClaimQuery();
         count = allDocs.size();
-        if(count != 0) {
+        if (count != 0) {
             _doLog("Deleting previous Nice claim(s)...");
 
-            for(int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 _session.removeDocument(allDocs.get(i).getRef());
             }
             _session.save();
@@ -481,7 +512,10 @@ public class UpdateDemoData {
         // (setting some values, required by the chains ran by these handlers)
         // We also handle a unique path for this nice claim
         UIDSequencer svc = Framework.getService(UIDSequencer.class);
-        niceClaim = _session.createDocumentModel(kNICE_CLAIM_PARENT_PATH, "claim-" + _yyyyMMdd.format(creationDate.getTime()) + "-" + Integer.toString(svc.getNext("NiceClaim")), "InsuranceClaim");
+        niceClaim = _session.createDocumentModel(kNICE_CLAIM_PARENT_PATH,
+                "claim-" + _yyyyMMdd.format(creationDate.getTime()) + "-"
+                        + Integer.toString(svc.getNext("NiceClaim")),
+                "InsuranceClaim");
         niceClaim.setPropertyValue("incl:incident_kind", "accident");
         niceClaim.setPropertyValue("incl:contract_id", "045-781-245");
         niceClaim.setPropertyValue("incl:incident_date", creationDate);
@@ -496,7 +530,7 @@ public class UpdateDemoData {
         // Now update all infos
         niceClaim.setPropertyValue("dc:created", creationDate);
         niceClaim.setPropertyValue("incl:date_received", creationDate);
-        user = kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ];
+        user = kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)];
         niceClaim.setPropertyValue("dc:creator", user);
         _updateModificationInfo(niceClaim, user, creationDate);
         _updateTitle(niceClaim, _yyyyMMdd.format(creationDate.getTime()));
@@ -505,16 +539,21 @@ public class UpdateDemoData {
         niceClaim.setPropertyValue("pein:last_name", "Thecase");
         niceClaim.setPropertyValue("pein:phone_main", "(123)-456-7890");
 
-        aDate = _buildDate(_today,  _randomInt(30, 180) * -1);
+        aDate = _buildDate(_today, _randomInt(30, 180) * -1);
         niceClaim.setPropertyValue("incl:contract_start", aDate);
         aDate.add(Calendar.DATE, 365);
         niceClaim.setPropertyValue("incl:contract_end", aDate);
 
         niceClaim.setPropertyValue("incl:due_date", _buildDate(_today, -2));
-        niceClaim.setPropertyValue("incl:incident_description", "I was driving the speed limit, and this car just came out of the parking lot and hit my car, on the front-left.");
-        niceClaim.setPropertyValue("incl:incident_location", "1234 Nth 56 Street");
+        niceClaim.setPropertyValue(
+                "incl:incident_description",
+                "I was driving the speed limit, and this car just came out of the parking lot and hit my car, on the front-left.");
+        niceClaim.setPropertyValue("incl:incident_location",
+                "1234 Nth 56 Street");
         niceClaim.setPropertyValue("incl:incident_city", "New York");
-        niceClaim.setPropertyValue("incl:incident_weather", "Summary: Rain in the evening.\nWind Bearing: 88\nWindSpeed: 7.89\nHumidity: 0.81");
+        niceClaim.setPropertyValue(
+                "incl:incident_weather",
+                "Summary: Rain in the evening.\nWind Bearing: 88\nWindSpeed: 7.89\nHumidity: 0.81");
         niceClaim.setPropertyValue("incl:repaid_amount", 260.0);
         niceClaim.setPropertyValue("incl:valuation_comments", "");
         niceClaim.setPropertyValue("incl:valuation_estimates", 260.0);
@@ -532,29 +571,33 @@ public class UpdateDemoData {
         // So, I keep this code, but for nice display of the audit, it is likely
         // that a the nxp_logs table of the db should be changed manually...
         // (or via a shell script started from here for example)
-        String[] transitions = { "to_CheckContract", "to_Opened", "to_Completed", "to_Evaluated", "to_DecisionMade" };
+        String[] transitions = { "to_CheckContract", "to_Opened",
+                "to_Completed", "to_Evaluated", "to_DecisionMade" };
         int statsIdx = -1;
         aDate = (Calendar) creationDate.clone();
         _doLog("Updating the Nice Claim");
-        //_doLog("Updating the Nice Claim, writing one second for each modif. Please, be patient (18-20 seconds)");
+        // _doLog("Updating the Nice Claim, writing one second for each modif. Please, be patient (18-20 seconds)");
         int maxModifLoop = 18;
-        for(int i = 1; i < maxModifLoop; i++) {
-            aDate= _buildDate(aDate, i);
-            _updateModificationInfo(niceClaim, kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ], aDate);
+        for (int i = 1; i < maxModifLoop; i++) {
+            aDate = _buildDate(aDate, i);
+            _updateModificationInfo(niceClaim,
+                    kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], aDate);
             _session.saveDocument(niceClaim);
             _session.save();
-            //_wait(1000);
+            // _wait(1000);
             _doLog(i + "/" + maxModifLoop);
 
-            if((i%3) == 0) {
+            if ((i % 3) == 0) {
                 statsIdx += 1;
-                if(statsIdx < transitions.length) {
-                    _updateModificationInfo(niceClaim, kUSERS[ _randomInt(0, kMAX_FOR_USERS_RANDOM) ], aDate);
+                if (statsIdx < transitions.length) {
+                    _updateModificationInfo(niceClaim,
+                            kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], aDate);
                     niceClaim.followTransition(transitions[statsIdx]);
                     _session.saveDocument(niceClaim);
                     _session.save();
-                    //_wait(1000);
-                    _doLog(i + "/" + maxModifLoop + " (lifecycle: Following \"" + transitions[statsIdx] + "\")");
+                    // _wait(1000);
+                    _doLog(i + "/" + maxModifLoop + " (lifecycle: Following \""
+                            + transitions[statsIdx] + "\")");
                 }
             }
         }
