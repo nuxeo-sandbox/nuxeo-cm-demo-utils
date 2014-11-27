@@ -19,21 +19,13 @@ package org.nuxeo.cm.demo.test;
 
 import static org.junit.Assert.*;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import org.nuxeo.cm.demo.RandomFirstLastName;
+import org.nuxeo.cm.demo.RandomFirstLastName.GENDER;
 import org.nuxeo.ecm.automation.AutomationService;
-import org.nuxeo.ecm.automation.OperationChain;
-import org.nuxeo.ecm.automation.OperationContext;
-import org.nuxeo.ecm.automation.core.util.Properties;
 import org.nuxeo.ecm.automation.test.EmbeddedAutomationServerFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.test.PlatformFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
@@ -56,6 +48,25 @@ public class MiscTests {
 
     @Test
     public void testRandomFirstLastNames() throws Exception {
+
+        String s;
+
+        // Just checking nothing is triggered
+        s = RandomFirstLastName.getFirstName(GENDER.MALE);
+        assertNotNull(s);
+        assertTrue(!s.isEmpty());
+
+        s = RandomFirstLastName.getFirstName(GENDER.FEMALE);
+        assertNotNull(s);
+        assertTrue(!s.isEmpty());
+
+        s = RandomFirstLastName.getFirstName(GENDER.ANY);
+        assertNotNull(s);
+        assertTrue(!s.isEmpty());
+
+        s = RandomFirstLastName.getLastName();
+        assertNotNull(s);
+        assertTrue(!s.isEmpty());
 
     }
 

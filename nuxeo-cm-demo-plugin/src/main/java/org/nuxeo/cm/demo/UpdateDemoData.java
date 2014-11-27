@@ -369,10 +369,11 @@ public class UpdateDemoData {
                     kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], modifDate);
 
             // Update first/last names
-            RandomFirstLastName fnln = new RandomFirstLastName(
-                    RandomFirstLastName.kMALE_OR_FEMALE);
-            oneDoc.setPropertyValue("pein:first_name", fnln.getFirstName());
-            oneDoc.setPropertyValue("pein:last_name", fnln.getLastName());
+            oneDoc.setPropertyValue(
+                    "pein:first_name",
+                    RandomFirstLastName.getFirstName(RandomFirstLastName.GENDER.ANY));
+            oneDoc.setPropertyValue("pein:last_name",
+                    RandomFirstLastName.getLastName());
 
             // Now update some info of the children, if any
             DocumentModelList children = _session.getChildren(oneDoc.getRef());

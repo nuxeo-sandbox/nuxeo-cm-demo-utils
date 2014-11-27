@@ -2,7 +2,7 @@
 
   <extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"
     point="operations">
-    <operation class="org.nuxeo.cm.demo.utils.WeatherHistory" />
+    <operation class="org.nuxeo.cm.demo.WeatherHistory" />
   </extension>
 
 </component>
