@@ -14,7 +14,7 @@
  * Contributors:
  *     thibaud
  */
-package org.nuxeo.cm.demo.utils;
+package org.nuxeo.cm.demo;
 
 /**
  * @author Thibaud Arguillere

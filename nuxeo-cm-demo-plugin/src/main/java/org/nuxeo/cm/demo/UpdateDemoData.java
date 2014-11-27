@@ -14,7 +14,7 @@
  * Contributors:
  *     thibaud
  */
-package org.nuxeo.cm.demo.utils;
+package org.nuxeo.cm.demo;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

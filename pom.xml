@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-addons-parent</artifactId>
-    <version>5.9.6-SNAPSHOT</version>
+    <version>7.1-SNAPSHOT</version>
   </parent>
   <groupId>org.nuxeo.cm.demo</groupId>
   <artifactId>nuxeo-cm-demo-parent</artifactId>
@@ -11,22 +11,22 @@
   <packaging>pom</packaging>
   <description></description>
   <modules>
-    <module>nuxeo-cm-demo-utils</module>
-    <module>nuxeo-cm-demo-utils-mp</module>
+    <module>nuxeo-cm-demo-plugin</module>
+    <module>nuxeo-cm-demo-mp</module>
   </modules>
   <properties>
-    <nuxeo.cm.demo.version>5.9.6-SNAPSHOT</nuxeo.cm.demo.version>
+    <nuxeo.cm.demo.version>7.1-SNAPSHOT</nuxeo.cm.demo.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.nuxeo.cm.demo</groupId>
-        <artifactId>nuxeo-cm-demo-utils</artifactId>
+        <artifactId>nuxeo-cm-demo-plugin</artifactId>
         <version>${nuxeo.cm.demo.version}</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.cm.demo</groupId>
-        <artifactId>nuxeo-cm-demo-utils-mp</artifactId>
+        <artifactId>nuxeo-cm-demo-mp</artifactId>
         <version>${nuxeo.cm.demo.version}</version>
       </dependency>
       <dependency>
@@ -55,6 +55,7 @@
         <enabled>false</enabled>
       </releases>
       <snapshots>
+        <updatePolicy>always</updatePolicy>
         <enabled>true</enabled>
       </snapshots>
     </repository>
@@ -69,10 +70,29 @@
       </snapshots>
     </repository>
   </repositories>
-
-  <scm>
-    <connection>scm:git:git://github.com/nuxeo/nuxeo-cm-demo-utils.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:nuxeo/nuxeo-cm-demo-utils.git</developerConnection>
-    <url>https://github.com/nuxeo/nuxeo-cm-demo-utils</url>
-  </scm>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>public</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <name>Nuxeo virtual release repository</name>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>public-snapshot</id>
+      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
+      <name>Nuxeo virtual snapshot repository</name>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 </project>

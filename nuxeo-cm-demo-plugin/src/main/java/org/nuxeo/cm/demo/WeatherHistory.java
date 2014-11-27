@@ -15,7 +15,7 @@
  *     Thibaud Arguillere (nuxeo)
  */
 
-package org.nuxeo.cm.demo.utils;
+package org.nuxeo.cm.demo;
 
 import java.io.BufferedReader;
 import java.io.IOException;

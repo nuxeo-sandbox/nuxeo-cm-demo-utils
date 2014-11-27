@@ -3,13 +3,12 @@
   <parent>
     <groupId>org.nuxeo.cm.demo</groupId>
     <artifactId>nuxeo-cm-demo-parent</artifactId>
-    <version>5.9.6-SNAPSHOT</version>
+    <version>7.1-SNAPSHOT</version>
   </parent>
   <groupId>org.nuxeo.cm.demo</groupId>
-  <artifactId>nuxeo-cm-demo-utils</artifactId>
+  <artifactId>nuxeo-cm-demo-plugin</artifactId>
   <name>nuxeo-cm-demo-utils</name>
   <description></description>
-
   <dependencies>
     <dependency>
       <groupId>org.nuxeo.common</groupId>
@@ -71,40 +70,4 @@
       </plugin>
     </plugins>
   </build>
-  <repositories>
-    <repository>
-      <id>public</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>public-snapshot</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <updatePolicy>always</updatePolicy>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>public</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
-      <name>Nuxeo releases</name>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 </project>

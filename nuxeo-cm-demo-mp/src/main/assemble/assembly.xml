@@ -12,8 +12,8 @@
     <property name="init.done" value="true" />
   </target>
 
-  <target name="build" depends="init" description="Build Case Management Utils Package">
-    <echo>Build Case Management Utils Package</echo>
+  <target name="build" depends="init" description="Build Nuxeo CM Demo Utils">
+    <echo>Building Nuxeo CM Demo Utils Markeplace Package</echo>
     <delete failonerror="false" dir="${marketplace}" />
     <mkdir dir="${marketplace}" />
 
@@ -36,7 +36,7 @@
     </copy>
 
     <zip destfile="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip"
-         basedir="${outdir}/marketplace" />
+         basedir="${marketplace}" />
     <artifact:attach file="${outdir}/${maven.project.artifactId}-${maven.project.version}.zip"
                      target="${maven.project.groupId}:${maven.project.artifactId}"
                      type="zip" />

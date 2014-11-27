@@ -15,7 +15,7 @@
  *     thibaud
  */
 
-package org.nuxeo.cm.demo.utils;
+package org.nuxeo.cm.demo;
 
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
