@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-Vendor: Nuxeo
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Bundle-Version: 1.0.qualifier
+Bundle-Version: 7.1.qualifier
 Bundle-Name: nuxeo-cm-demo-utils
 Bundle-ManifestVersion: 2
 Nuxeo-Component: OSGI-INF/extensions/org.nuxeo.cm.demo.utils.WeatherHi
