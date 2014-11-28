@@ -171,7 +171,7 @@ public class UpdateDemoData {
     protected void _setup() {
         _kSTATES = new HashMap<String, Integer>();
         _kSTATES.put("received", kLFS_RECEIVED);
-        _kSTATES.put("checkcontract", kLFS_RECEIVED);
+        _kSTATES.put("checkcontract", kLFS_CHECK_CONTRACT);
         _kSTATES.put("opened", kLFS_OPENED);
         _kSTATES.put("completed", kLFS_COMPLETED);
         _kSTATES.put("expertonsiteneeded", kLFS_EXPERT_ON_SITE_NEEDED);
