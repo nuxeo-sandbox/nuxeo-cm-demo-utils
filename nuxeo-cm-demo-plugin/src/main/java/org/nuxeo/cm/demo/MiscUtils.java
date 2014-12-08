@@ -17,8 +17,6 @@
 package org.nuxeo.cm.demo;
 
 /**
- *
- *
  * @since 7.1
  */
 public class MiscUtils {

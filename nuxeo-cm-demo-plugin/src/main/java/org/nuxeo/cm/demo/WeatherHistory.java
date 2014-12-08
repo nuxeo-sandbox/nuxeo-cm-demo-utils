@@ -42,43 +42,22 @@ import org.nuxeo.runtime.api.Framework;
  * @since 5.8
  */
 /**
- * This operation receives the name of a city and a date (format
- * YYYY-MM-DDTHH:MM:SS), and fills a specific field of the current document with
- * weather informations.
- *
- * This is an example, a Proof Of Concept, to be run with Nuxeo's InsuranceClaim
- * demo. The purpose is to give an example of calling an external service from
- * the server. Here, we get the weather, but it shows how you could get any
- * information from any service. Typical example would be to retrieve data from
- * another application, running in the same system: get a person information,
- * get a contract information, ...
- *
- * WARNING and IMPORTANT 1/ Typical POC demo. We don't do a lot of error-check
- * here, to let the code as much readable as possible: No check on the JSON
- * nodes, no check if the schema is valid, ...
- *
- * 2/ Also: We update a specific field in a specific schema, and then we save
- * the document => Current document *must* exist and *must* have a String field
- * incl:incident_weather
- *
- * 3/ You need external system keys to get: -> The latitude/longitude given the
- * name of a city => Done with a BING key (we use dev.virtualearth.net service)
- * -> The weather info for this location at this date => Done with a forecast.io
- * key
- *
- * To avoid hardcoding the keys in this code, we use configuration entries in
- * nuxeo.conf. So you need to add the following to nuxeo.conf of the server:
- * demo.weatherhistory.forecastio.key=YOUR forecast.io KEY HERE
- * demo.weatherhistory.bing.key=YOUR Bing KEY HERE (and of course, restart the
- * server after changing the conf.)
- *
- * Getting a dev. code from these services is easy and free (as of today,
- * 2013-11-11)
- *
- *
- * The super-amazing ;-> algorithm is: 1/ Get the latitude/longitude for a city
- * 2/ Build the forecast URL 3/ Connect and get the data 4/ Extract data from
- * the JSON string 5/ Update the incl:incident_weather property of the document
+ * This operation receives the name of a city and a date (format YYYY-MM-DDTHH:MM:SS), and fills a specific field of the
+ * current document with weather informations. This is an example, a Proof Of Concept, to be run with Nuxeo's
+ * InsuranceClaim demo. The purpose is to give an example of calling an external service from the server. Here, we get
+ * the weather, but it shows how you could get any information from any service. Typical example would be to retrieve
+ * data from another application, running in the same system: get a person information, get a contract information, ...
+ * WARNING and IMPORTANT 1/ Typical POC demo. We don't do a lot of error-check here, to let the code as much readable as
+ * possible: No check on the JSON nodes, no check if the schema is valid, ... 2/ Also: We update a specific field in a
+ * specific schema, and then we save the document => Current document *must* exist and *must* have a String field
+ * incl:incident_weather 3/ You need external system keys to get: -> The latitude/longitude given the name of a city =>
+ * Done with a BING key (we use dev.virtualearth.net service) -> The weather info for this location at this date => Done
+ * with a forecast.io key To avoid hardcoding the keys in this code, we use configuration entries in nuxeo.conf. So you
+ * need to add the following to nuxeo.conf of the server: demo.weatherhistory.forecastio.key=YOUR forecast.io KEY HERE
+ * demo.weatherhistory.bing.key=YOUR Bing KEY HERE (and of course, restart the server after changing the conf.) Getting
+ * a dev. code from these services is easy and free (as of today, 2013-11-11) The super-amazing ;-> algorithm is: 1/ Get
+ * the latitude/longitude for a city 2/ Build the forecast URL 3/ Connect and get the data 4/ Extract data from the JSON
+ * string 5/ Update the incl:incident_weather property of the document
  */
 @Operation(id = WeatherHistory.ID, category = Constants.CAT_DOCUMENT, label = "WeatherHistory", description = "Receives the name of a city and a date (YYYY-MM-DD), and fills the incl:incident_weather field.<BR/>Important: This is an example of calling an external service (2 actually, Bing and Forecast.io) from the server, to be adapted to your needs. This example requires that current document has a incl:incident_weather field.")
 public class WeatherHistory {
@@ -93,8 +72,7 @@ public class WeatherHistory {
     public static final String INSCLAIM_DEMO_BING_CONF_KEY = "demo.weatherhistory.bing.key";
 
     /**
-     * URL to be used with the service:
-     * api.forecast.io/forecast/dev_key/latitude,longitude,date
+     * URL to be used with the service: api.forecast.io/forecast/dev_key/latitude,longitude,date
      */
     public static final String FORECAST_URL = "https://api.forecast.io/forecast/%s/%s,%s";
 
@@ -137,8 +115,7 @@ public class WeatherHistory {
     }
 
     @OperationMethod(collector = DocumentModelCollector.class)
-    public DocumentModel run(DocumentModel input) throws PropertyException,
-            ClientException, IOException {
+    public DocumentModel run(DocumentModel input) throws PropertyException, ClientException, IOException {
         String weather = "(unknown)";
 
         _getServicesKeysFromConf();
@@ -163,14 +140,12 @@ public class WeatherHistory {
             // latLong empty means the city was not found
             if (latLong != "") {
 
-                String query = String.format(FORECAST_URL, _devKeyForecastio,
-                        latLong, dateStr);
+                String query = String.format(FORECAST_URL, _devKeyForecastio, latLong, dateStr);
 
                 try {
                     URL url = new URL(query);
 
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(url.openStream()));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                     StringBuffer sb = new StringBuffer();
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
@@ -204,8 +179,7 @@ public class WeatherHistory {
                     in.close();
 
                 } catch (IOException e) {
-                    if (e.getMessage().indexOf(
-                            "Server returned HTTP response code: 400") < 0) {
+                    if (e.getMessage().indexOf("Server returned HTTP response code: 400") < 0) {
                         throw new RuntimeException(e);
                     }
                 } finally {
@@ -224,8 +198,7 @@ public class WeatherHistory {
     /**
      * Same for calling BING to get latitude/longitude
      */
-    public String getFormattedLatitudeLongitudeForCity(String inCity)
-            throws MalformedURLException {
+    public String getFormattedLatitudeLongitudeForCity(String inCity) throws MalformedURLException {
         String latlong = "";
 
         inCity = inCity.replace(" ", "%20");
@@ -236,8 +209,7 @@ public class WeatherHistory {
             try {
                 URL url = new URL(query);
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        url.openStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 StringBuffer sb = new StringBuffer();
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
