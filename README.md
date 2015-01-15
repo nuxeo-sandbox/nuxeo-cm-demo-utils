@@ -12,15 +12,7 @@ A plug-in for the Case Management demo (cm.cloud.nuxeo.com)
 
 _Note_: You can also get the .zip of the market place package in the "Releases" part of this project (on GitHub)
 
-_Other Note_: This project is part of the Nuxeo's continuous integration system. As so, it declares a dependency against the Studio project deployed on cm.cloud.nuxeo.com => You may want to remove this dependency before building the plug-in. To remove this dependency, open `cm-demo-utils/pom.xml` and remove (or comment) the following lines:
-
-  ```
-  <dependency>
-    <groupId>nuxeo-studio</groupId>
-    <artifactId>cm-showcase-nux</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
-  </dependency>
-  ```
+_Other Note_: This project expects specific schemas to be implemented in your solution and depends on the Studsio project deployed on cm.cloud.nuxeo.com => If you plan to use it (and not just look at the code) then make sure your own projects have the same schemas and fields (`InsuranceClaim` schema with expected lifecycle states, ...)
 
 Assuming maven is correctly setup on your computer:
 
