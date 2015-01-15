@@ -35,8 +35,7 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import com.google.inject.Inject;
 
 @RunWith(FeaturesRunner.class)
-@Features({ PlatformFeature.class, CoreFeature.class,
-        EmbeddedAutomationServerFeature.class })
+@Features({ PlatformFeature.class, CoreFeature.class, EmbeddedAutomationServerFeature.class })
 @Deploy({ "nuxeo-cm-demo-utils" })
 public class MiscTests {
 
