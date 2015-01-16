@@ -24,4 +24,21 @@ public class MiscUtils {
     public static int randomInt(int inMin, int inMax) {
         return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
     }
+    
+    /**
+     * Utility which uses <code>info()</code> if the INFO log level is enabled,
+     * else log as <code>warn()</code>
+     *
+     * @param inLog
+     * @param inWhat
+     *
+     * @since TODO
+     */
+    public static void forceLogInfo(org.apache.commons.logging.Log inLog, String inWhat) {
+        if (inLog.isInfoEnabled()) {
+            inLog.info(inWhat);
+        } else {
+            inLog.warn(inWhat);
+        }
+    }
 }
