@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-addons-parent</artifactId>
-    <version>6.0-HF06-SNAPSHOT</version>
+    <version>6.0-HF07-SNAPSHOT</version>
   </parent>
   <groupId>org.nuxeo.cm.demo</groupId>
   <artifactId>nuxeo-cm-demo-parent</artifactId>
@@ -15,7 +15,7 @@
     <module>nuxeo-cm-demo-utils-mp</module>
   </modules>
   <properties>
-    <nuxeo.cm.demo.version>6.0-HF06-SNAPSHOT</nuxeo.cm.demo.version>
+    <nuxeo.cm.demo.version>6.0-HF07-SNAPSHOT</nuxeo.cm.demo.version>
   </properties>
   <dependencyManagement>
     <dependencies>
