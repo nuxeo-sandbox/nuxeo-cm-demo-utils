@@ -90,7 +90,7 @@ public class UpdateDemoData {
     static protected final int kLFS_ARCHIVED = 7;
 
     // This list should be loaded dynamically
-    static protected final String[] kUSERS = { "john", "alan", "kate", "julie", "mike" };
+    static protected final String[] kUSERS = { "john", "john", "john", "john", "kate", "kate", "kate", "alan", "julie", "julie", "mike" };
 
     static protected final int kMAX_FOR_USERS_RANDOM = kUSERS.length - 1;
 
@@ -99,6 +99,13 @@ public class UpdateDemoData {
     static private final String kNICE_CLAIM_FIELD = "dc:format";
 
     static private final String kNICE_CLAIM_FIELD_VALUE = "Nice claim for template rendering";
+    
+    static private final String[] kCITIES = {"New York", "New York", "New York", "Los Angeles", "Los Angeles", "Atlanta", "Seattle", "Boston", "Orlando"};
+    
+    static private final int kCITIES_MAX = kCITIES.length - 1;
+    
+    // WARNING: UPDATE THIS citiesAndStates IF YOU CHANGE kCITIES
+    static private HashMap<String, String> citiesAndStates;
 
     protected DateFormat _yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -142,6 +149,14 @@ public class UpdateDemoData {
         _kSTATES.put("evaluated", kLFS_EVALUATED);
         _kSTATES.put("decisionmade", kLFS_DECISION_MADE);
         _kSTATES.put("archived", kLFS_ARCHIVED);
+
+        citiesAndStates = new HashMap<String, String>();
+        citiesAndStates.put("New York",  "NY");
+        citiesAndStates.put("Los Angeles", "CA");
+        citiesAndStates.put("Atlanta",  "GA");
+        citiesAndStates.put("Seattle",  "WA");
+        citiesAndStates.put("Boston",  "MA");
+        citiesAndStates.put("Orlando",  "FL");
     }
 
     protected int _lifecycleStateStrToInt(String inLCS) {
@@ -162,6 +177,17 @@ public class UpdateDemoData {
 
         d.add(Calendar.DATE, inDays);
         if (d.after(_today)) {
+            d = (Calendar) _today.clone();
+        }
+
+        return d;
+    }
+
+    private Calendar _buildDate(Calendar inDate, int inDays, boolean inOkIfAfterToday) {
+        Calendar d = (Calendar) inDate.clone();
+
+        d.add(Calendar.DATE, inDays);
+        if (d.after(_today) && !inOkIfAfterToday) {
             d = (Calendar) _today.clone();
         }
 
@@ -250,27 +276,53 @@ public class UpdateDemoData {
         for (DocumentModel oneDoc : allDocs) {
             Calendar aDate, startDate, creationDate, modifDate;
             String creator;
+            
+            updateLifecycleState(oneDoc);
+            
             int lfs = _lifecycleStateStrToInt(oneDoc.getCurrentLifeCycleState().toLowerCase());
             String creationDateStr;
 
             // Half in previous month
             creationDate = (Calendar) _today.clone();
-            if (_randomInt(0, 6) >= 3) {
-                // Depends a bit on the Lifecycle State
-                if (lfs >= kLFS_COMPLETED) {
-                    creationDate.add(Calendar.DATE, _randomInt(15, 30) * -1);
-                } else {
-                    creationDate.add(Calendar.DATE, _randomInt(0, 30) * -1);
-                }
-            } else {
-                creationDate.add(Calendar.DATE, _randomInt(31, 90) * -1);
+            switch(lfs) {
+            case kLFS_ARCHIVED:
+                creationDate.add(Calendar.DATE, _randomInt(30, 90) * -1);
+                break;
+                
+            case kLFS_RECEIVED:
+                creationDate.add(Calendar.DATE, _randomInt(2, 20) * -1);
+                break;
+                
+            case kLFS_CHECK_CONTRACT:
+                creationDate.add(Calendar.DATE, _randomInt(5, 30) * -1);
+                break;
+                
+            case kLFS_OPENED:
+                creationDate.add(Calendar.DATE, _randomInt(20, 40) * -1);
+                break;
+                
+            case kLFS_COMPLETED:
+                creationDate.add(Calendar.DATE, _randomInt(20, 40) * -1);
+                break;
+                
+            case kLFS_EVALUATED:
+                creationDate.add(Calendar.DATE, _randomInt(50, 80) * -1);
+                break;
+                
+            case kLFS_DECISION_MADE:
+                creationDate.add(Calendar.DATE, _randomInt(30, 90) * -1);
+                break;
+                
+                default:
+                    creationDate.add(Calendar.DATE, _randomInt(31, 90) * -1);
+                    break;
             }
 
             creationDateStr = _yyyyMMdd.format(creationDate.getTime());
             oneDoc.setPropertyValue("dc:created", creationDate);
             oneDoc.setPropertyValue("incl:date_received", creationDate);
 
-            // We don't want to build the exact same du_date as the Studio
+            // We don't want to build the exact same due_date as the Studio
             // project does
             // because we want mixed due_date for our JavaScript dashboard
             /*
@@ -285,7 +337,7 @@ public class UpdateDemoData {
             if (_randomInt(1, 4) == 1) {
                 aDate = _buildDate(_today, _randomInt(1, 10) * -1);
             } else {
-                aDate = _buildDate(_today, _randomInt(1, 30));
+                aDate = _buildDate(_today, _randomInt(1, 30), true);
             }
             oneDoc.setPropertyValue("incl:due_date", aDate);
 
@@ -307,7 +359,7 @@ public class UpdateDemoData {
             // Update contract start/end date. Say a range of one year with
             // today
             // in this range
-            aDate = _buildDate(_today, _randomInt(30, 180) * -1);
+            aDate = _buildDate(creationDate, _randomInt(30, 180) * -1);
             oneDoc.setPropertyValue("incl:contract_start", aDate);
             aDate.add(Calendar.DATE, 365);
             oneDoc.setPropertyValue("incl:contract_end", aDate);
@@ -315,19 +367,29 @@ public class UpdateDemoData {
             // If the case is closed, change the date of the closing
             // We also set the modifDate here because it is == closing date if
             // accurate
+            // For Kibana stats, have modif dates in the last 3 months
+            // IMPORTANT: This will not be accurate with the creation date,
+            // it may happen the creation date becomes > modification
+            modifDate = _buildDate(_today, _randomInt(0, 90) * -1);
+            /*
             if (lfs == kLFS_ARCHIVED) {
-                aDate = _buildDate(_today, _randomInt(0, 5) * -1);
+                aDate = _buildDate(_today, _randomInt(5, 90) * -1);
                 oneDoc.setPropertyValue("incl:date_closed", aDate);
                 modifDate = (Calendar) aDate.clone();
             } else {
                 // Let say it was modified recently...
                 modifDate = _buildDate(_today, _randomInt(0, 10) * -1);
             }
+            */
             _updateModificationInfo(oneDoc, kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], modifDate);
 
             // Update first/last names
             oneDoc.setPropertyValue("pein:first_name", RandomFirstLastName.getFirstName(RandomFirstLastName.GENDER.ANY));
             oneDoc.setPropertyValue("pein:last_name", RandomFirstLastName.getLastName());
+            
+            String city = kCITIES[ _randomInt(0, kCITIES_MAX)];
+            oneDoc.setPropertyValue("incl:incident_city", city);
+            oneDoc.setPropertyValue("incl:incident_us_state", citiesAndStates.get(city));
 
             // Now update some info of the children, if any
             DocumentModelList children = _session.getChildren(oneDoc.getRef());
@@ -387,6 +449,37 @@ public class UpdateDemoData {
 
         _session.save();
         _doLog("End of update demo data");
+    }
+    
+    protected void updateLifecycleState(DocumentModel inDoc) {
+        
+        String current = inDoc.getCurrentLifeCycleState();
+        // We keep 5% of "Received"?
+        if(current.equals("Received") && _randomInt(1, 20) > 1) {
+            inDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+            inDoc.putContextData("UpdatingData_NoEventPlease", true);
+            inDoc.followTransition("to_CheckContract");
+            
+            int r = _randomInt(1, 100);
+            // 57% of Archived +> we are at 62%
+            if(r > 43) {
+                inDoc.followTransition("to_Opened");
+                inDoc.followTransition("to_Completed");
+                inDoc.followTransition("to_Evaluated");
+                inDoc.followTransition("to_DecisionMade");
+                inDoc.followTransition("to_Archived");
+            } else if(r > 7){ //7% stay in CheckContract => we are at 69%
+                inDoc.followTransition("to_Opened");
+                if(r > 12) {
+                    inDoc.followTransition("to_Completed");
+                }
+                if(r > 35) {
+                    inDoc.followTransition("to_Evaluated");
+                }
+                // We ignore DesisionMade
+            }
+        }
+        
     }
 
     /*
@@ -527,6 +620,8 @@ public class UpdateDemoData {
                 statsIdx += 1;
                 if (statsIdx < transitions.length) {
                     _updateModificationInfo(niceClaim, kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], aDate);
+                    niceClaim.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+                    niceClaim.putContextData("UpdatingData_NoEventPlease", true);
                     niceClaim.followTransition(transitions[statsIdx]);
                     _session.saveDocument(niceClaim);
                     _session.save();
