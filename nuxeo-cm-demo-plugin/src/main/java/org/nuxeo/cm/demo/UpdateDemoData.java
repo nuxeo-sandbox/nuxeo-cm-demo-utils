@@ -16,6 +16,7 @@
  */
 package org.nuxeo.cm.demo;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.datademo.RandomFirstLastNames;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -114,8 +116,10 @@ public class UpdateDemoData {
     protected CoreSession _session;
 
     protected int _saveCounter = 0;
+    
+    RandomFirstLastNames randomPeopleNames;
 
-    public UpdateDemoData(CoreSession inSession) {
+    public UpdateDemoData(CoreSession inSession) throws IOException {
         _session = inSession;
         _setup();
     }
@@ -139,7 +143,7 @@ public class UpdateDemoData {
         }
     }
 
-    protected void _setup() {
+    protected void _setup() throws IOException {
         _kSTATES = new HashMap<String, Integer>();
         _kSTATES.put("received", kLFS_RECEIVED);
         _kSTATES.put("checkcontract", kLFS_CHECK_CONTRACT);
@@ -157,6 +161,9 @@ public class UpdateDemoData {
         citiesAndStates.put("Seattle",  "WA");
         citiesAndStates.put("Boston",  "MA");
         citiesAndStates.put("Orlando",  "FL");
+        
+        randomPeopleNames = RandomFirstLastNames.getInstance();
+        
     }
 
     protected int _lifecycleStateStrToInt(String inLCS) {
@@ -384,8 +391,8 @@ public class UpdateDemoData {
             _updateModificationInfo(oneDoc, kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], modifDate);
 
             // Update first/last names
-            oneDoc.setPropertyValue("pein:first_name", RandomFirstLastName.getFirstName(RandomFirstLastName.GENDER.ANY));
-            oneDoc.setPropertyValue("pein:last_name", RandomFirstLastName.getLastName());
+            oneDoc.setPropertyValue("pein:first_name", randomPeopleNames.getAFirstName(RandomFirstLastNames.GENDER.ANY));
+            oneDoc.setPropertyValue("pein:last_name", randomPeopleNames.getALastName());
             
             String city = kCITIES[ _randomInt(0, kCITIES_MAX)];
             oneDoc.setPropertyValue("incl:incident_city", city);
