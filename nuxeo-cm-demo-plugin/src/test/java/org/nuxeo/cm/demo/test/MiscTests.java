@@ -19,10 +19,11 @@ package org.nuxeo.cm.demo.test;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nuxeo.cm.demo.RandomFirstLastName;
-import org.nuxeo.cm.demo.RandomFirstLastName.GENDER;
+import org.nuxeo.datademo.LifecycleHandler;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.test.EmbeddedAutomationServerFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -46,27 +47,50 @@ public class MiscTests {
     AutomationService service;
 
     @Test
-    public void testRandomFirstLastNames() throws Exception {
+    public void testLifeCycle() throws Exception {
 
-        String s;
-
-        // Just checking nothing is triggered
-        s = RandomFirstLastName.getFirstName(GENDER.MALE);
-        assertNotNull(s);
-        assertTrue(!s.isEmpty());
-
-        s = RandomFirstLastName.getFirstName(GENDER.FEMALE);
-        assertNotNull(s);
-        assertTrue(!s.isEmpty());
-
-        s = RandomFirstLastName.getFirstName(GENDER.ANY);
-        assertNotNull(s);
-        assertTrue(!s.isEmpty());
-
-        s = RandomFirstLastName.getLastName();
-        assertNotNull(s);
-        assertTrue(!s.isEmpty());
-
+        ArrayList<String> states = new ArrayList<String>();
+        states.add("Received");
+        states.add("CheckContract");
+        states.add("Opened");
+        states.add("Completed");
+        states.add("ExpertOnSiteNeeded");
+        states.add("Evaluated");
+        states.add("DecisionMade");
+        states.add("Archived");
+        
+        ArrayList<String> transitions = new ArrayList<String>();
+        transitions.add("to_CheckContract");
+        transitions.add("to_Opened");
+        transitions.add("to_Completed");
+        transitions.add("to_ExpertOnSiteNeeded");
+        transitions.add("to_Evaluated");
+        transitions.add("to_DecisionMade");
+        transitions.add("to_Archived");
+        
+        String[] strStates = new String[states.size()];
+        states.toArray(strStates);
+        String[] strTransitions = new String[transitions.size()];
+        transitions.toArray(strTransitions);
+        LifecycleHandler lifeCycleWithOnSite = new LifecycleHandler(strStates, strTransitions);
+        
+        states.remove("ExpertOnSiteNeeded");
+        strStates = new String[states.size()];
+        states.toArray(strStates);
+        transitions.remove("to_ExpertOnSiteNeeded");
+        strTransitions = new String[transitions.size()];
+        transitions.toArray(strTransitions);
+        LifecycleHandler lifeCycleNoOnSite = new LifecycleHandler(strStates, strTransitions);
+        
+        assertTrue(lifeCycleWithOnSite.compareStates("Evaluated", "ExpertOnSiteNeeded") > 0);
+        assertTrue(lifeCycleNoOnSite.compareStates("Received", "Opened") < 0);
+        
+        try {
+            int ignore = lifeCycleNoOnSite.compareStates("123", "456");
+            assertTrue("Should have raise and IllegalArgumentException", false);
+        } catch(Exception e) {
+            
+        }
     }
 
 }

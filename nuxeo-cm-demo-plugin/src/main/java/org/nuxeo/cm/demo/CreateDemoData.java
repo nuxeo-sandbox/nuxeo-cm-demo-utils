@@ -19,12 +19,12 @@ package org.nuxeo.cm.demo;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.common.collections.ScopeType;
+import org.nuxeo.datademo.LifecycleHandler;
 import org.nuxeo.datademo.RandomDates;
 import org.nuxeo.datademo.RandomFirstLastNames;
 import org.nuxeo.datademo.RandomUSZips;
@@ -56,7 +56,7 @@ public class CreateDemoData {
     protected static final Calendar TODAY = Calendar.getInstance();
 
     // This static final will be updated during setup
-    protected static final Calendar TWO_MONTHS_AGO = Calendar.getInstance();
+    protected static final Calendar THREE_MONTHS_AGO = Calendar.getInstance();
 
     protected Calendar startDate_3years;
 
@@ -79,8 +79,10 @@ public class CreateDemoData {
 
     static protected final int USERS_MAX = USERS.length - 1;
 
-    // 
-    static protected final String[] KINDS = { "accident", "accident", "accident", "accident", "breakdown", "breakdown", "breakdown", "robbery", "robbery", "other" };
+    //
+    static protected final String[] KINDS = { "accident", "accident",
+            "accident", "accident", "breakdown", "breakdown", "breakdown",
+            "robbery", "robbery", "other" };
 
     static protected final int KINDS_MAX = KINDS.length - 1;
 
@@ -97,6 +99,10 @@ public class CreateDemoData {
     protected RandomFirstLastNames firstLastNames;
 
     protected RandomUSZips usZips;
+
+    protected LifecycleHandler lifeCycleWithOnSite;
+
+    protected LifecycleHandler lifeCycleNoOnSite;
 
     protected Calendar claimCreation;
 
@@ -126,6 +132,8 @@ public class CreateDemoData {
         firstLastNames = RandomFirstLastNames.getInstance();
         usZips = RandomUSZips.getInstance();
 
+        setupLifeCycleDef();
+
         startDate_3years = Calendar.getInstance();
         startDate_3years.add(Calendar.YEAR, -3);
 
@@ -134,10 +142,49 @@ public class CreateDemoData {
 
         startDate_1year = Calendar.getInstance();
         startDate_1year.add(Calendar.YEAR, -1);
-        
-        Calendar twoMonthsAgo = (Calendar) TODAY.clone();
-        twoMonthsAgo.add(Calendar.DATE, -60);
-        TWO_MONTHS_AGO.set(TWO_MONTHS_AGO.get(Calendar.YEAR), TWO_MONTHS_AGO.get(Calendar.MONTH), TWO_MONTHS_AGO.get(Calendar.DAY_OF_MONTH));
+
+        Calendar threeMonthsAgo = (Calendar) TODAY.clone();
+        threeMonthsAgo.add(Calendar.DATE, -90);
+        THREE_MONTHS_AGO.set(threeMonthsAgo.get(Calendar.YEAR),
+                threeMonthsAgo.get(Calendar.MONTH),
+                threeMonthsAgo.get(Calendar.DAY_OF_MONTH));
+    }
+
+    protected void setupLifeCycleDef() {
+
+        ArrayList<String> states = new ArrayList<String>();
+        states.add("Received");
+        states.add("CheckContract");
+        states.add("Opened");
+        states.add("Completed");
+        states.add("ExpertOnSiteNeeded");
+        states.add("Evaluated");
+        states.add("DecisionMade");
+        states.add("Archived");
+
+        ArrayList<String> transitions = new ArrayList<String>();
+        transitions.add("to_CheckContract");
+        transitions.add("to_Opened");
+        transitions.add("to_Completed");
+        transitions.add("to_ExpertOnSiteNeeded");
+        transitions.add("to_Evaluated");
+        transitions.add("to_DecisionMade");
+        transitions.add("to_Archived");
+
+        String[] strStates = new String[states.size()];
+        states.toArray(strStates);
+        String[] strTransitions = new String[transitions.size()];
+        transitions.toArray(strTransitions);
+        lifeCycleWithOnSite = new LifecycleHandler(strStates, strTransitions);
+
+        states.remove("ExpertOnSiteNeeded");
+        strStates = new String[states.size()];
+        states.toArray(strStates);
+        transitions.remove("to_ExpertOnSiteNeeded");
+        strTransitions = new String[transitions.size()];
+        transitions.toArray(strTransitions);
+        lifeCycleNoOnSite = new LifecycleHandler(strStates, strTransitions);
+
     }
 
     protected void createData() {
@@ -161,8 +208,21 @@ public class CreateDemoData {
             // "UpdatingData_NoEventPlease", true);
             til.saveDocumentAndCommitIfNeeded(oneDoc);
 
-            // Update lifecycle after creation and save
-            updateLifecycleState(oneDoc);
+            // Update lifecycle after creation and save.
+            // NOtice that we also update the document depending on the lifecycle, so
+            // we must update it.
+            oneDoc.refresh();
+            updateLifecycleStateAndRelatedData(oneDoc);
+            oneDoc.putContextData(
+                    DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+            // Make sure events are not triggered
+            oneDoc.putContextData("UpdatingData_NoEventPlease", true);
+            // Let's try this one?
+            // oneDoc.putContextData(ScopeType.REQUEST,
+            // "UpdatingData_NoEventPlease", true);
+            til.saveDocumentAndCommitIfNeeded(oneDoc);
+
+            // Update values that depends on the lifecycle
 
             if ((i % LOG_MODULO) == 0) {
                 ToolsMisc.forceLogInfo(log, "InsuranceClaim creation: " + i
@@ -174,8 +234,8 @@ public class CreateDemoData {
     }
 
     protected DocumentModel createNewInsuranceClaim() {
-        
-        Calendar cal;
+
+        Calendar someCalValue;
 
         DocumentModel claim = session.createDocumentModel(parentPath, "zetitl",
                 "InsuranceClaim");
@@ -184,17 +244,30 @@ public class CreateDemoData {
         claim.setPropertyValue("dc:created", claimCreation);
 
         claim.setPropertyValue("dublincore:creator", getRandomUser());
-        
+
         // The state will be "Archived" for all cases older than 2 months
-        if(claimCreation.before(TWO_MONTHS_AGO)) {
-            Calendar modified = RandomDates.addDays(claimCreation, 3, 90, TWO_MONTHS_AGO);
+        if (claimCreation.before(THREE_MONTHS_AGO)) {
+            someCalValue = RandomDates.addDays(claimCreation, 3, 90,
+                    THREE_MONTHS_AGO);
+        } else {
+            someCalValue = RandomDates.addDays(claimCreation,
+                    ToolsMisc.randomInt(3, 90), true);
         }
-        
-        cal = RandomDates.buildDate(claimCreation, 0, 5, true);
-        claim.setPropertyValue("incl:incident_date", cal);
-        
-        claim.setPropertyValue("incl:incident_kind", KINDS[ToolsMisc.randomInt(0, KINDS_MAX)]);
-        
+        claim.setPropertyValue("dc:modified", someCalValue);
+        claim.setPropertyValue("dublincore:lastContributor", getRandomUser());
+
+        someCalValue = RandomDates.buildDate(claimCreation, 0, 5, true);
+        claim.setPropertyValue("incl:incident_date", someCalValue);
+
+        String kind = KINDS[ToolsMisc.randomInt(0, KINDS_MAX)];
+        claim.setPropertyValue("incl:incident_kind", kind);
+
+        someCalValue = (Calendar) TODAY.clone();
+        if (kind.equals("breakdown")) {
+            someCalValue.add(Calendar.DATE, 10);
+        } else {
+            someCalValue.add(Calendar.DATE, 0);
+        }
 
         claim.setPropertyValue("pein:first_name",
                 firstLastNames.getAFirstName(RandomFirstLastNames.GENDER.ANY));
@@ -225,14 +298,14 @@ public class CreateDemoData {
 
         return creation;
     }
-    
+
     /*
      * Just a shortcut
      */
     protected String getRandomUser() {
-        
+
         return USERS[ToolsMisc.randomInt(0, USERS_MAX)];
-        
+
     }
 
     protected void setCityAndState(DocumentModel inClaim) {
@@ -252,14 +325,52 @@ public class CreateDemoData {
 
     }
 
-    protected void updateLifecycleState(DocumentModel oneClaim) {
+    /*
+     * Depending on the lifecycle, we can have more or less info. For example, a
+     * value for the estimate and the repaid amount
+     */
+    protected void updateLifecycleStateAndRelatedData(DocumentModel oneClaim) {
 
-        // All the cases of older than 2 months are closed and archived
-        if(claimCreation.before(TWO_MONTHS_AGO)) {
+        // All the cases older than 2 months are closed and archived
+        if (claimCreation.before(THREE_MONTHS_AGO)) {
             oneClaim.followTransition("to_Archived");
         } else {
             // . . .
         }
+
+        String lfs = oneClaim.getCurrentLifeCycleState();
+
+        if (lfs.equals("ExpertOnSiteNeeded")) {
+            oneClaim.setPropertyValue("incl:valuation_on_site", true);
+        }
+
+        if (lifeCycleWithOnSite.compareStates(lfs, "Evaluated") >= 0
+                || lifeCycleNoOnSite.compareStates(lfs, "Evaluated") >= 0) {
+            // Say we had around 30% of expert on site?
+            oneClaim.setPropertyValue("incl:valuation_on_site",
+                    ToolsMisc.randomInt(1, 100) < 35);
+
+            double repaid = ToolsMisc.randomInt(100, 10000);
+            oneClaim.setPropertyValue("incl:repaid_amount", repaid);
+            // In 27% we had good estimates
+            int r = ToolsMisc.randomInt(1, 100);
+            if (r < 28) {
+                oneClaim.setPropertyValue("incl:valuation_estimates", repaid);
+            } else {
+                // We are between, say +/- 20% error
+                // In 60% of the case we underestimated the thing
+                r = ToolsMisc.randomInt(5, 22);
+                double value = (repaid * (((double) r) / 100));
+                if (ToolsMisc.randomInt(1, 100) > 42) {
+                    value = repaid - value;
+                } else {
+                    value = repaid + value;
+                }
+                oneClaim.setPropertyValue("incl:valuation_estimates", value);
+            }
+
+        }
+
     }
 
     protected void deletePreviousIfNeeded() {
