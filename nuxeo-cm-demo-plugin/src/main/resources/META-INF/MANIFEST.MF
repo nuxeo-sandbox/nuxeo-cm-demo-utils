@@ -9,5 +9,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: Nuxeo
 Nuxeo-Component: OSGI-INF/extensions/org.nuxeo.cm.demo.utils.WeatherHi
  story.xml,OSGI-INF/extensions/org.nuxeo.cm.demo.utils.UpdateDemoDataO
- p.xml
+ p.xml,OSGI-INF/extensions/org.nuxeo.cm.demo.CreateDemoDataOp.xml
 

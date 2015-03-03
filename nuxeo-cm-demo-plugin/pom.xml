@@ -108,6 +108,10 @@
       <artifactId>nuxeo-core-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.nuxeo.ecm.core</groupId>
+      <artifactId>nuxeo-core-storage-sql</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
