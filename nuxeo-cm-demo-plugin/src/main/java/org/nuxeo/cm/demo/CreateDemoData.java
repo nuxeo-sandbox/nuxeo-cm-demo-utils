@@ -287,31 +287,20 @@ public class CreateDemoData {
                         + "\n    commitModulo: " + til.getCommitModulo());
 
         for (int i = 0; i < howMany; i++) {
-            DocumentModel oneDoc = createNewInsuranceClaim();
-
-            oneDoc.putContextData(
-                    DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
-            // Make sure events are not triggered
-            oneDoc.putContextData("UpdatingData_NoEventPlease", true);
-            // Let's try this one?
-            // oneDoc.putContextData(ScopeType.REQUEST,
-            // "UpdatingData_NoEventPlease", true);
+            DocumentModel theClaim = createNewInsuranceClaim();
 
             // Update lifecycle _after_ creation and save because the lowlevel
             // routines expect the document to already exist in the db beore
             // being able to change the lifecycle state
             // Notice that we also update the document depending on the
             // lifecycle: valuation for example
-            oneDoc.refresh();
-            updateLifecycleStateAndRelatedData(oneDoc);
-            oneDoc.putContextData(
-                    DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
-            // Make sure events are not triggered
-            oneDoc.putContextData("UpdatingData_NoEventPlease", true);
-            // Let's try this one?
-            // oneDoc.putContextData(ScopeType.REQUEST,
-            // "UpdatingData_NoEventPlease", true);
-            til.saveDocumentAndCommitIfNeeded(oneDoc);
+            theClaim.refresh();
+            // Not sure we need that actually, but no time to trace and follow
+            disableListeners(theClaim);
+            updateLifecycleStateAndRelatedData(theClaim);
+            // Now save the document itself
+            disableListeners(theClaim);
+            til.saveDocumentAndCommitIfNeeded(theClaim);
 
             if ((i % logModulo) == 0) {
                 doLogAndWorkerStatus("InsuranceClaim creation: " + i + "/"
@@ -394,7 +383,7 @@ public class CreateDemoData {
                 firstLastNames.getAFirstName(RandomFirstLastNames.GENDER.ANY));
         claim.setPropertyValue("pein:last_name", firstLastNames.getALastName());
         claim.setPropertyValue("pein:phone_main", randomUSPhoneNumber());
-        // inclidentlocation is a fake address. Something like "1234 MARIE St"
+        // incidentlocation is a fake address. Something like "1234 MARIE St"
         someStr = ""
                 + ToolsMisc.randomInt(1, 10000)
                 + " "
@@ -403,12 +392,13 @@ public class CreateDemoData {
                 + LOCATION_STREETS[ToolsMisc.randomInt(0, LOCATION_STREETS_MAX)];
         claim.setPropertyValue("incl:incident_location", someStr);
         setCityAndState(claim);
-        
-        claim.setPropertyValue("incl:due_date", RandomDates.buildDate(claimCreation, 15, 40, false));
+
+        claim.setPropertyValue("incl:due_date",
+                RandomDates.buildDate(claimCreation, 15, 40, false));
 
         // Disable DublinCore
-        claim.putContextData(
-                DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
+        claim.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
+                true);
         // Make sure events are not triggered
         claim.putContextData("UpdatingData_NoEventPlease", true);
         claim = session.createDocument(claim);
@@ -462,8 +452,9 @@ public class CreateDemoData {
     }
 
     /*
-     * WARNING: This code bypasses the check done by misc. low-level services in
-     * nuxeo, so you could find yourself setting a state that dopes not exist.
+     * WARNING: This code bypasses the sanity check done by misc. low-level
+     * services in nuxeo, so you could find yourself setting a state that dopes
+     * not exist.
      * 
      * This method makes _a_lot_ of assumption: The session is a LocalSession,
      * data is stored in a SQL database, etc.
@@ -627,6 +618,15 @@ public class CreateDemoData {
             }
         }
 
+    }
+
+    protected void disableListeners(DocumentModel inClaim) {
+        // Disable DublinCore
+        inClaim.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
+                true);
+        // Make sure events are not triggered in the CM-SHOWCASE project
+        inClaim.putContextData("UpdatingData_NoEventPlease",
+                "whatever-just-not-null");
     }
 
     protected void deletePreviousIfNeeded() {
