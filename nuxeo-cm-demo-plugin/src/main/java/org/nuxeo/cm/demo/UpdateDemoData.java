@@ -37,6 +37,7 @@ import org.nuxeo.ecm.core.api.model.PropertyException;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
  * @author Thibaud Arguillere
@@ -125,7 +126,14 @@ public class UpdateDemoData {
     }
 
     public void run() throws Exception {
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+        
         _UpdateData();
+        
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
     }
 
     private int _randomInt(int inMin, int inMax) {
@@ -139,7 +147,8 @@ public class UpdateDemoData {
         if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
             _doLog("Commiting the last " + kSAVE_SESSION_MODULO
                     + " InsuranceClaim (and their children.) Total InsuranceClaim handled: " + _saveCounter);
-            _session.save();
+            TransactionHelper.commitOrRollbackTransaction();
+            TransactionHelper.startTransaction();
         }
     }
 
@@ -527,7 +536,7 @@ public class UpdateDemoData {
      */
     protected void _niceClaimCreate() throws Exception {
         Calendar aDate, creationDate;
-        String user;
+        String user, title;
         int count;
         DocumentModel niceClaim = null;
 
@@ -554,9 +563,13 @@ public class UpdateDemoData {
         // (setting some values, required by the chains ran by these handlers)
         // We also handle a unique path for this nice claim
         UIDSequencer svc = Framework.getService(UIDSequencer.class);
+        title = _yyyyMMdd.format(creationDate.getTime()) + "-ACC-" + Integer.toString(svc.getNext("ACC"));
         niceClaim = _session.createDocumentModel(kNICE_CLAIM_PARENT_PATH,
                 "claim-" + _yyyyMMdd.format(creationDate.getTime()) + "-" + Integer.toString(svc.getNext("NiceClaim")),
                 "InsuranceClaim");
+        
+        niceClaim.setPropertyValue("dc:title", title);
+        niceClaim.setPropertyValue("incl:incident_id", title);
         niceClaim.setPropertyValue("incl:incident_kind", "accident");
         niceClaim.setPropertyValue("incl:contract_id", "045-781-245");
         niceClaim.setPropertyValue("incl:incident_date", creationDate);
