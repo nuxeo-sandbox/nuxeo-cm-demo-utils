@@ -15,7 +15,7 @@
     <dependency>
       <groupId>org.nuxeo.datademo</groupId>
       <artifactId>nuxeo-datademo-plugin</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.nuxeo.common</groupId>
