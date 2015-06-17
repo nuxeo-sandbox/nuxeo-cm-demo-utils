@@ -21,7 +21,6 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.cm.demo.CreateDemoData;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
@@ -41,8 +40,6 @@ import org.nuxeo.runtime.api.Framework;
 @Operation(id = CreateDemoDataOp.ID, category = Constants.CAT_SERVICES, label = "InsuranceClaims: Create Demo Data", description = "")
 public class CreateDemoDataOp {
     
-    private static final Log log = LogFactory.getLog(CreateDemoDataOp.class);
-
     public static final String ID = "CreateDemoDataOp";
 
     @Context

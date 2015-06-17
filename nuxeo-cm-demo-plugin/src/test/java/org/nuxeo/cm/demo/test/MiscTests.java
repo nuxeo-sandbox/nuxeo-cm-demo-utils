@@ -21,6 +21,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.datademo.LifecycleHandler;
@@ -36,15 +38,26 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import com.google.inject.Inject;
 
 @RunWith(FeaturesRunner.class)
-@Features({ PlatformFeature.class, CoreFeature.class, EmbeddedAutomationServerFeature.class })
+@Features({ PlatformFeature.class, CoreFeature.class,
+        EmbeddedAutomationServerFeature.class })
 @Deploy({ "nuxeo-cm-demo-utils" })
 public class MiscTests {
-
+    
     @Inject
     CoreSession coreSession;
 
     @Inject
     AutomationService service;
+    
+    @Before
+    public void setUp() {
+        
+    }
+    
+    @After
+    public void cleanup() {
+        
+    }
 
     @Test
     public void testLifeCycle() throws Exception {

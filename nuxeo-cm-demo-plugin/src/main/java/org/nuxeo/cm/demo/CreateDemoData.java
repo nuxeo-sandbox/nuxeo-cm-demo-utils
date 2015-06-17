@@ -37,11 +37,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.api.local.LocalSession;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
-import org.nuxeo.ecm.core.model.Document;
-import org.nuxeo.ecm.core.model.Session;
-import org.nuxeo.ecm.core.storage.sql.coremodel.SQLDocument;
 import org.nuxeo.ecm.core.work.AbstractWork;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
@@ -53,16 +49,16 @@ import org.nuxeo.runtime.api.Framework;
  * 
  * Very specific to the "CM-SHOWCASE" Studio project and its schemas, etc.
  * 
- * Also this is suppose to be about a one shot thing. Once the data is created
+ * Also this is supposed to be about a one shot thing. Once the data is created
  * and you are happy with it, just dump the db and import it in a new database
- * (and run the "Update ALl Dates" utilities)
+ * (and run the "Update All Dates" utilities)
  *
  * @since 7.2
  */
 /*
  * ================= WARNING WARNING WARNING WARNING WARNING =================
  * About changing the lifecycle state, we are using code that bypasses a lot of
- * controls (so we avoid event sent, etc.). See customSetCurrentLifecycleState()
+ * controls (so we avoid event sent, etc.).
  * ============================================================================
  */
 public class CreateDemoData {
@@ -91,8 +87,9 @@ public class CreateDemoData {
 
     protected int logModulo = LOG_MODULO;
 
-    protected static String[] MAIN_US_STATES = { "TX", "NY", "CA", "PA", "IL",
-            "OH", "MO", "MA", "FL" };
+    protected static String[] MAIN_US_STATES = { "TX", "NY", "NY", "NY", "NY",
+            "CA", "CA", "CA", "PA", "IL", "OH", "MO", "MA", "MA", "FL", "FL",
+            "FL" };
 
     protected static final int MAIN_US_STATES_MAX = MAIN_US_STATES.length - 1;
 
@@ -116,8 +113,8 @@ public class CreateDemoData {
     // Filled during setup
     protected static final HashMap<String, String> KIND_PREFIX = new HashMap<String, String>();
 
-    protected static final String[] WHY_REJECTED = { "Submission Too Late",
-            "Submission Too Late", "Submission Too Late", "Unknown Contract",
+    protected static final String[] WHY_REJECTED = { "Overdue Submission",
+            "Overdue Submission", "Overdue Submission", "Unknown Contract",
             "Unknown Contract", "No Coverage for State", "Missing Info" };
 
     protected static final int WHY_REJECTED_MAX = WHY_REJECTED.length - 1;
@@ -300,6 +297,7 @@ public class CreateDemoData {
             updateLifecycleStateAndRelatedData(theClaim);
             // Now save the document itself
             disableListeners(theClaim);
+            theClaim.refresh();
             til.saveDocumentAndCommitIfNeeded(theClaim);
 
             if ((i % logModulo) == 0) {
@@ -362,12 +360,6 @@ public class CreateDemoData {
         }
 
         // Contract info
-        someCalValue = (Calendar) TODAY.clone();
-        if (kind.equals("breakdown")) {
-            someCalValue.add(Calendar.DATE, 10);
-        } else {
-            someCalValue.add(Calendar.DATE, 0);
-        }
         someCalValue = RandomDates.buildDate(claimCreation, 30, 100, true);
         claim.setPropertyValue("incl:contract_start", someCalValue);
         someCalValue.add(Calendar.YEAR, 1);
@@ -448,30 +440,6 @@ public class CreateDemoData {
 
         inClaim.setPropertyValue("incl:incident_city", zip.city);
         inClaim.setPropertyValue("incl:incident_us_state", zip.state);
-
-    }
-
-    /*
-     * WARNING: This code bypasses the sanity check done by misc. low-level
-     * services in nuxeo, so you could find yourself setting a state that dopes
-     * not exist.
-     * 
-     * This method makes _a_lot_ of assumption: The session is a LocalSession,
-     * data is stored in a SQL database, etc.
-     * 
-     * In the context of this very specific plug-in, it is ok (notice we don't
-     * say "it _probably" is ok"n or "it _should_ be ok" :->.
-     */
-    protected void customSetCurrentLifecycleState(DocumentModel inDoc,
-            String inState) throws DocumentException, LifeCycleException {
-
-        LocalSession localSession = (LocalSession) session;
-        Session baseSession = localSession.getSession();
-
-        Document baseDoc = baseSession.getDocumentByUUID(inDoc.getId());
-        // SQLDocument sqlDoc = (SQLDocument) baseDoc;
-        // sqlDoc.setCurrentLifeCycleState(inState);
-        baseDoc.setCurrentLifeCycleState(inState);
 
     }
 
@@ -570,7 +538,7 @@ public class CreateDemoData {
             }
             newState = statsToUse[ToolsMisc.randomInt(0, 99)];
         }
-        customSetCurrentLifecycleState(oneClaim, newState);
+        LifecycleHandler.directSetCurrentLifecycleState(session, oneClaim, newState);
 
         oneClaim.refresh();
         if (newState.equals("ExpertOnSiteNeeded")) {

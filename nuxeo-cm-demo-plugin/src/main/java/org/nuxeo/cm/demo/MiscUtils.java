@@ -20,10 +20,6 @@ package org.nuxeo.cm.demo;
  * @since 7.1
  */
 public class MiscUtils {
-
-    public static int randomInt(int inMin, int inMax) {
-        return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
-    }
     
     /**
      * Utility which uses <code>info()</code> if the INFO log level is enabled,
@@ -32,9 +28,9 @@ public class MiscUtils {
      * @param inLog
      * @param inWhat
      *
-     * @since TODO
+     * @since 7.1
      */
-    public static void forceLogInfo(org.apache.commons.logging.Log inLog, String inWhat) {
+    public static void forceLogInfo222(org.apache.commons.logging.Log inLog, String inWhat) {
         if (inLog.isInfoEnabled()) {
             inLog.info(inWhat);
         } else {
