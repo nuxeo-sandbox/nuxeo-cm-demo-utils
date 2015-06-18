@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -40,12 +41,13 @@ import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
+import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
 
 /**
- * Creates 100,000 cases, dispatched on 3 years
+ * Creates 100,000 cases by default, dispatched on 3 years
  * 
  * Very specific to the "CM-SHOWCASE" Studio project and its schemas, etc.
  * 
@@ -66,6 +68,12 @@ public class CreateDemoData {
     private static final Log log = LogFactory.getLog(CreateDemoData.class);
 
     protected static final int HOW_MANY = 100000;
+
+    protected static final int YIELD_TO_BG_WORK_MODULO = 1000;
+
+    // Every yieldToBgWorkModulo, we sleep until there are max
+    // MIN_BG_WORKERS_FOR_SLEEP active workers
+    public static int MIN_BG_WORKERS_FOR_SLEEP = 10;
 
     protected static final Calendar TODAY = Calendar.getInstance();
 
@@ -129,6 +137,8 @@ public class CreateDemoData {
 
     protected int commitModulo = 0;
 
+    protected int yieldToBgWorkModulo = YIELD_TO_BG_WORK_MODULO;
+
     protected RandomFirstLastNames firstLastNames;
 
     protected RandomUSZips usZips;
@@ -152,6 +162,8 @@ public class CreateDemoData {
     protected static UIDSequencer uidSequencer = Framework.getService(UIDSequencer.class);
 
     protected AbstractWork worker = null;
+
+    protected WorkManager workManager;
 
     public CreateDemoData(CoreSession inSession, DocumentModel inParent) {
 
@@ -283,7 +295,7 @@ public class CreateDemoData {
                 "Creation of 'InsuranceClaim' with:\n    howMany: " + howMany
                         + "\n    commitModulo: " + til.getCommitModulo());
 
-        for (int i = 0; i < howMany; i++) {
+        for (int i = 1; i <= howMany; i++) {
             DocumentModel theClaim = createNewInsuranceClaim();
 
             // Update lifecycle _after_ creation and save because the lowlevel
@@ -292,13 +304,11 @@ public class CreateDemoData {
             // Notice that we also update the document depending on the
             // lifecycle: valuation for example
             theClaim.refresh();
-            // Not sure we need that actually, but no time to trace and follow
             disableListeners(theClaim);
-            updateLifecycleStateAndRelatedData(theClaim);
+            theClaim = updateLifecycleStateAndRelatedData(theClaim);
             // Now save the document itself
             disableListeners(theClaim);
-            theClaim.refresh();
-            til.saveDocumentAndCommitIfNeeded(theClaim);
+            theClaim = til.saveDocumentAndCommitIfNeeded(theClaim);
 
             if ((i % logModulo) == 0) {
                 doLogAndWorkerStatus("InsuranceClaim creation: " + i + "/"
@@ -307,9 +317,56 @@ public class CreateDemoData {
                     worker.setProgress(new Progress(i, howMany));
                 }
             }
+
+            // Also, when creating a lot of Claims, we want to let background
+            // work to be able to breathe a bit.
+            if ((i % yieldToBgWorkModulo) == 0) {
+                waitForSomeBackgroundWorkToFinish();
+            }
         }
 
         til.commitAndStartNewTransaction();
+    }
+
+    protected void waitForSomeBackgroundWorkToFinish() {
+
+        int count;
+        long startTime = System.currentTimeMillis();
+        do {
+            count = countActiveWorks();
+            if (count > MIN_BG_WORKERS_FOR_SLEEP) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+
+        } while (count > MIN_BG_WORKERS_FOR_SLEEP
+                && (System.currentTimeMillis() - startTime) < 5000);
+
+    }
+
+    protected WorkManager getWorkManager() {
+
+        if (workManager == null) {
+            workManager = Framework.getLocalService(WorkManager.class);
+        }
+        return workManager;
+    }
+
+    protected int countActiveWorks() {
+
+        int count = 0;
+
+        WorkManager wm = getWorkManager();
+        List<String> queueIds = wm.getWorkQueueIds();
+        for (String oneQueue : queueIds) {
+            count += wm.getQueueSize(oneQueue, null);
+        }
+
+        return count;
+
     }
 
     protected DocumentModel createNewInsuranceClaim() {
@@ -512,8 +569,9 @@ public class CreateDemoData {
         }
     }
 
-    protected void updateLifecycleStateAndRelatedData(DocumentModel oneClaim)
-            throws DocumentException, LifeCycleException {
+    protected DocumentModel updateLifecycleStateAndRelatedData(
+            DocumentModel oneClaim) throws DocumentException,
+            LifeCycleException {
 
         int r = ToolsMisc.randomInt(1, 100);
         String newState = "Opened";
@@ -538,7 +596,8 @@ public class CreateDemoData {
             }
             newState = statsToUse[ToolsMisc.randomInt(0, 99)];
         }
-        LifecycleHandler.directSetCurrentLifecycleState(session, oneClaim, newState);
+        LifecycleHandler.directSetCurrentLifecycleState(session, oneClaim,
+                newState);
 
         oneClaim.refresh();
         if (newState.equals("ExpertOnSiteNeeded")) {
@@ -585,6 +644,7 @@ public class CreateDemoData {
 
             }
         }
+        return oneClaim;
 
     }
 
@@ -651,6 +711,14 @@ public class CreateDemoData {
 
     public void setWorker(AbstractWork inValue) {
         worker = inValue;
+    }
+
+    public int getYieldToBgWorkModulo() {
+        return yieldToBgWorkModulo;
+    }
+
+    public void setYieldToBgWorkModulo(int inValue) {
+        yieldToBgWorkModulo = inValue > 0 ? inValue : YIELD_TO_BG_WORK_MODULO;
     }
 
 }

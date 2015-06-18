@@ -48,6 +48,7 @@ public class CreateDataDemoWork extends AbstractWork {
     protected int logModulo = 0;
 
     public CreateDataDemoWork(DocumentModel inParent) {
+        super();
         parentDoc = inParent;
     }
 
