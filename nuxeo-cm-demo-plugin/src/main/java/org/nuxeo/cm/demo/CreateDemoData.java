@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -41,7 +40,6 @@ import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
-import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
@@ -73,7 +71,7 @@ public class CreateDemoData {
 
     // Every yieldToBgWorkModulo, we sleep until there are max
     // MIN_BG_WORKERS_FOR_SLEEP active workers
-    public static int MIN_BG_WORKERS_FOR_SLEEP = 10;
+    public static int MAX_BG_WORKERS_BEFORE_SLEEP = 10;
 
     protected static final Calendar TODAY = Calendar.getInstance();
 
@@ -162,8 +160,6 @@ public class CreateDemoData {
     protected static UIDSequencer uidSequencer = Framework.getService(UIDSequencer.class);
 
     protected AbstractWork worker = null;
-
-    protected WorkManager workManager;
 
     public CreateDemoData(CoreSession inSession, DocumentModel inParent) {
 
@@ -319,54 +315,13 @@ public class CreateDemoData {
             }
 
             // Also, when creating a lot of Claims, we want to let background
-            // work to be able to breathe a bit.
+            // work to be able to breath a bit.
             if ((i % yieldToBgWorkModulo) == 0) {
-                waitForSomeBackgroundWorkToFinish();
+                MiscUtils.waitForBackgroundWorkCompletion(MAX_BG_WORKERS_BEFORE_SLEEP, 5000);
             }
         }
 
         til.commitAndStartNewTransaction();
-    }
-
-    protected void waitForSomeBackgroundWorkToFinish() {
-
-        int count;
-        long startTime = System.currentTimeMillis();
-        do {
-            count = countActiveWorks();
-            if (count > MIN_BG_WORKERS_FOR_SLEEP) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-            }
-
-        } while (count > MIN_BG_WORKERS_FOR_SLEEP
-                && (System.currentTimeMillis() - startTime) < 5000);
-
-    }
-
-    protected WorkManager getWorkManager() {
-
-        if (workManager == null) {
-            workManager = Framework.getLocalService(WorkManager.class);
-        }
-        return workManager;
-    }
-
-    protected int countActiveWorks() {
-
-        int count = 0;
-
-        WorkManager wm = getWorkManager();
-        List<String> queueIds = wm.getWorkQueueIds();
-        for (String oneQueue : queueIds) {
-            count += wm.getQueueSize(oneQueue, null);
-        }
-
-        return count;
-
     }
 
     protected DocumentModel createNewInsuranceClaim() {

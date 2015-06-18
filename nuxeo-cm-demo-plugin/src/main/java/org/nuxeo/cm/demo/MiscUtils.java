@@ -16,25 +16,46 @@
  */
 package org.nuxeo.cm.demo;
 
+import java.util.List;
+
+import org.nuxeo.ecm.core.work.api.WorkManager;
+import org.nuxeo.runtime.api.Framework;
+
 /**
  * @since 7.1
  */
 public class MiscUtils {
-    
-    /**
-     * Utility which uses <code>info()</code> if the INFO log level is enabled,
-     * else log as <code>warn()</code>
-     *
-     * @param inLog
-     * @param inWhat
-     *
-     * @since 7.1
-     */
-    public static void forceLogInfo222(org.apache.commons.logging.Log inLog, String inWhat) {
-        if (inLog.isInfoEnabled()) {
-            inLog.info(inWhat);
-        } else {
-            inLog.warn(inWhat);
+
+    protected static WorkManager workManager;
+
+    public static void waitForBackgroundWorkCompletion(int inMaxWorkers,
+            int inTimeout) {
+
+        if (workManager == null) {
+            workManager = Framework.getLocalService(WorkManager.class);
         }
+        
+        int count;
+        List<String> queueIds;
+        long startTime = System.currentTimeMillis();
+        do {
+            count = 0;
+            queueIds = workManager.getWorkQueueIds();
+            for (String oneQueue : queueIds) {
+                count += workManager.getQueueSize(oneQueue, null);
+            }
+
+            if (count > inMaxWorkers) {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+
+        } while (count > inMaxWorkers
+                && (System.currentTimeMillis() - startTime) < inTimeout);
+
     }
+
 }
