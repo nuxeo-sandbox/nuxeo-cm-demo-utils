@@ -80,5 +80,15 @@ public class MiscUtils {
                 && (System.currentTimeMillis() - startTime) < inTimeout);
 
     }
+    
+    public static String millisecondsToToTimeFormat(long inMs) {
+        
+        long second = (inMs / 1000) % 60;
+        long minute = (inMs / (1000 * 60)) % 60;
+        long hour = (inMs / (1000 * 60 * 60)) % 24;
+        
+        return String.format("%d:%02d:%02d", hour, minute, second);
+        
+    }
 
 }

@@ -187,6 +187,8 @@ public class CreateDemoData {
 
     public void run() throws IOException, DocumentException, LifeCycleException {
 
+        long startTime, endTime, deletionDuration, creationDuration;
+
         if (!checkEnvironment()) {
             doLogAndWorkerStatus("Environment is not correctly setup (Template Rendering, ...), no data is created.");
             return;
@@ -196,13 +198,33 @@ public class CreateDemoData {
 
         doLogAndWorkerStatus("Creation of " + howMany
                 + " 'InsuranceClaim': start");
-        deletePreviousIfNeeded();
-        createData();
-        doLogAndWorkerStatus("Creation of " + howMany
-                + " 'InsuranceClaim': end");
 
+        startTime = System.currentTimeMillis();
+        deletePreviousIfNeeded();
+        endTime = System.currentTimeMillis();
+        deletionDuration = (endTime - startTime) / 1000;
+
+        startTime = System.currentTimeMillis();
+        createData();
         RandomFirstLastNames.release();
         RandomUSZips.release();
+        endTime = System.currentTimeMillis();
+        creationDuration = (endTime - startTime) / 1000;
+
+        String logStr = "Creation of " + howMany + " 'InsuranceClaim': end";
+        if (worker != null) {
+            worker.setStatus(logStr);
+        }
+
+        logStr += "\n    Duration: "
+                + MiscUtils.millisecondsToToTimeFormat(deletionDuration
+                        + creationDuration);
+        logStr += "\n        Deletion: "
+                + MiscUtils.millisecondsToToTimeFormat(deletionDuration);
+        logStr += "\n        Creation: "
+                + MiscUtils.millisecondsToToTimeFormat(creationDuration);
+        ToolsMisc.forceLogInfo(log, logStr);
+
     }
 
     protected boolean checkEnvironment() {
@@ -642,7 +664,8 @@ public class CreateDemoData {
 
         if (deletePreviousData) {
 
-            String nxql = "SELECT * FROM InsuranceClaim";
+            String nxql = "SELECT * FROM InsuranceClaim WHERE ecm:path STARTSWITH '"
+                    + parentPath + '"';
             DocumentModelList docs;
 
             doLogAndWorkerStatus("Deleting previous 'InsuranceClaim'...");
