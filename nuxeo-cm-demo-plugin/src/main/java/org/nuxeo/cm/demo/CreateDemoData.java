@@ -39,7 +39,6 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
-import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
@@ -300,7 +299,6 @@ public class CreateDemoData {
             // being able to change the lifecycle state
             // Notice that we also update the document depending on the
             // lifecycle: valuation for example
-            theClaim.refresh();
             disableListeners(theClaim);
             theClaim = updateLifecycleStateAndRelatedData(theClaim);
             // Now save the document itself
