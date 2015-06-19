@@ -187,6 +187,11 @@ public class CreateDemoData {
 
     public void run() throws IOException, DocumentException, LifeCycleException {
 
+        if (!checkEnvironment()) {
+            doLogAndWorkerStatus("Environment is not correctly setup (Template Rendering, ...), no data is created.");
+            return;
+        }
+
         setup();
 
         doLogAndWorkerStatus("Creation of " + howMany
@@ -198,6 +203,26 @@ public class CreateDemoData {
 
         RandomFirstLastNames.release();
         RandomUSZips.release();
+    }
+
+    protected boolean checkEnvironment() {
+
+        boolean ok = true;
+
+        String nxql = "SELECT * FROM TemplateSource WHERE dc:title = 'Claim Report'";
+        try {
+            DocumentModelList docs = session.query(nxql);
+            if (docs == null || docs.size() < 1) {
+                ok = false;
+            }
+        } catch (Exception e) {
+            ok = false;
+        }
+        if (!ok) {
+            log.error("Cannot get the Claim Report template. Install the Template Rendering plug-in and the Claim Report template");
+        }
+
+        return ok;
     }
 
     protected void setup() throws IOException {
