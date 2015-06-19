@@ -65,9 +65,15 @@ public class CreateDemoData {
 
     private static final Log log = LogFactory.getLog(CreateDemoData.class);
 
-    protected static final int HOW_MANY = 100000;
+    protected static final int DEFAULT_HOW_MANY = 100000;
 
-    protected static final int YIELD_TO_BG_WORK_MODULO = 1000;
+    protected static final int DEFAULT_YIELD_TO_BG_WORK_MODULO = 500;
+    
+    protected static final int DEFAULT_COMMIT_MODULO = 50;
+
+    protected static final int DEFAULT_LOG_MODULO = 250;
+
+    protected static final boolean DEFAULT_DELETE_PREVIOUS_CLAIMS = true;
 
     // Every yieldToBgWorkModulo, we sleep until there are max
     // MIN_BG_WORKERS_FOR_SLEEP active workers
@@ -81,6 +87,8 @@ public class CreateDemoData {
 
     protected static Calendar THREE_MONTHS_AGO = Calendar.getInstance();
 
+    protected static Calendar ONE_WEEK_AGO;
+
     protected Calendar startDate_3years;
 
     protected Calendar startDate_2years;
@@ -89,9 +97,7 @@ public class CreateDemoData {
 
     protected DateFormat yyyyMMdd = new SimpleDateFormat("yyyyMMdd");
 
-    protected static final int LOG_MODULO = 500;
-
-    protected int logModulo = LOG_MODULO;
+    protected int logModulo = DEFAULT_LOG_MODULO;
 
     protected static String[] MAIN_US_STATES = { "TX", "NY", "NY", "NY", "NY",
             "CA", "CA", "CA", "PA", "IL", "OH", "MO", "MA", "MA", "FL", "FL",
@@ -125,7 +131,7 @@ public class CreateDemoData {
 
     protected static final int WHY_REJECTED_MAX = WHY_REJECTED.length - 1;
 
-    protected boolean deletePreviousData = true;
+    protected boolean deletePreviousClaims = DEFAULT_DELETE_PREVIOUS_CLAIMS;
 
     protected CoreSession session;
 
@@ -135,7 +141,7 @@ public class CreateDemoData {
 
     protected int commitModulo = 0;
 
-    protected int yieldToBgWorkModulo = YIELD_TO_BG_WORK_MODULO;
+    protected int yieldToBgWorkModulo = DEFAULT_YIELD_TO_BG_WORK_MODULO;
 
     protected RandomFirstLastNames firstLastNames;
 
@@ -165,7 +171,7 @@ public class CreateDemoData {
 
         session = inSession;
         parentPath = inParent.getPathAsString();
-        howMany = HOW_MANY;
+        howMany = DEFAULT_HOW_MANY;
     }
 
     public CreateDemoData(CoreSession inSession, DocumentModel inParent,
@@ -173,7 +179,7 @@ public class CreateDemoData {
 
         session = inSession;
         parentPath = inParent.getPathAsString();
-        howMany = inHowMany <= 0 ? HOW_MANY : inHowMany;
+        howMany = inHowMany <= 0 ? DEFAULT_HOW_MANY : inHowMany;
     }
 
     protected void doLogAndWorkerStatus(String inWhat) {
@@ -202,14 +208,14 @@ public class CreateDemoData {
         startTime = System.currentTimeMillis();
         deletePreviousIfNeeded();
         endTime = System.currentTimeMillis();
-        deletionDuration = (endTime - startTime) / 1000;
+        deletionDuration = endTime - startTime;
 
         startTime = System.currentTimeMillis();
         createData();
         RandomFirstLastNames.release();
         RandomUSZips.release();
         endTime = System.currentTimeMillis();
-        creationDuration = (endTime - startTime) / 1000;
+        creationDuration = endTime - startTime;
 
         String logStr = "Creation of " + howMany + " 'InsuranceClaim': end";
         if (worker != null) {
@@ -249,7 +255,7 @@ public class CreateDemoData {
 
     protected void setup() throws IOException {
 
-        howMany = howMany <= 0 ? HOW_MANY : howMany;
+        howMany = howMany <= 0 ? DEFAULT_HOW_MANY : howMany;
 
         firstLastNames = RandomFirstLastNames.getInstance();
         usZips = RandomUSZips.getInstance();
@@ -289,6 +295,9 @@ public class CreateDemoData {
         THREE_MONTHS_AGO.set(someMonthsAgo.get(Calendar.YEAR),
                 someMonthsAgo.get(Calendar.MONTH),
                 someMonthsAgo.get(Calendar.DAY_OF_MONTH));
+        
+        ONE_WEEK_AGO = Calendar.getInstance();
+        ONE_WEEK_AGO.add(Calendar.DATE, -6);
 
     }
 
@@ -390,6 +399,8 @@ public class CreateDemoData {
 
         DocumentModel claim = session.createDocumentModel(parentPath, title,
                 "InsuranceClaim");
+        
+        claim.setPropertyValue("incl:tag_created_for_demo", true);
 
         claim.setPropertyValue("dc:title", title);
         claim.setPropertyValue("incl:incident_id", title);
@@ -464,15 +475,18 @@ public class CreateDemoData {
         // So year-3 = 27% of the total, year-2 = 32 and current year = 41
         int r = ToolsMisc.randomInt(1, 100);
         Calendar creation;
+        
         if (r < 28) {
-            creation = (Calendar) startDate_3years.clone();
+            creation = RandomDates.buildDate(startDate_3years, 1, 365, false);
         } else if (r < 59) {
-            creation = (Calendar) startDate_2years.clone();
+            creation = RandomDates.buildDate(startDate_2years, 1, 365, false);
         } else {
-            creation = (Calendar) startDate_1year.clone();
+            if(ToolsMisc.randomInt(1, 100) > 94) {
+                creation = RandomDates.addDays(ONE_WEEK_AGO, ToolsMisc.randomInt(1, 7), true);
+            } else {
+                creation = RandomDates.buildDate(startDate_1year, 1, 365, false);
+            }
         }
-
-        creation.add(Calendar.DATE, ToolsMisc.randomInt(0, 365));
 
         return creation;
     }
@@ -662,10 +676,10 @@ public class CreateDemoData {
 
     protected void deletePreviousIfNeeded() {
 
-        if (deletePreviousData) {
+        if (deletePreviousClaims) {
 
             String nxql = "SELECT * FROM InsuranceClaim WHERE ecm:path STARTSWITH '"
-                    + parentPath + '"';
+                    + parentPath + "'";
             DocumentModelList docs;
 
             doLogAndWorkerStatus("Deleting previous 'InsuranceClaim'...");
@@ -701,8 +715,8 @@ public class CreateDemoData {
 
     }
 
-    public void setDeletePreviousData(boolean deletePreviousData) {
-        this.deletePreviousData = deletePreviousData;
+    public void setDeletePreviousClaims(boolean deletePreviousClaims) {
+        this.deletePreviousClaims = deletePreviousClaims;
     }
 
     public void setCommitModulo(int inValue) {
@@ -710,7 +724,7 @@ public class CreateDemoData {
     }
 
     public void setLogModulo(int inValue) {
-        logModulo = inValue > 0 ? inValue : LOG_MODULO;
+        logModulo = inValue > 0 ? inValue : DEFAULT_LOG_MODULO;
     }
 
     public void setWorker(AbstractWork inValue) {
@@ -722,7 +736,7 @@ public class CreateDemoData {
     }
 
     public void setYieldToBgWorkModulo(int inValue) {
-        yieldToBgWorkModulo = inValue > 0 ? inValue : YIELD_TO_BG_WORK_MODULO;
+        yieldToBgWorkModulo = inValue > 0 ? inValue : DEFAULT_YIELD_TO_BG_WORK_MODULO;
     }
 
 }

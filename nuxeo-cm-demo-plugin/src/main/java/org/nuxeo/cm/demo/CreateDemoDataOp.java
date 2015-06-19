@@ -19,6 +19,7 @@ package org.nuxeo.cm.demo;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
@@ -35,7 +36,7 @@ import org.nuxeo.runtime.api.Framework;
 /**
  * 
  */
-@Operation(id = CreateDemoDataOp.ID, category = Constants.CAT_SERVICES, label = "InsuranceClaims: Create Demo Data", description = "")
+@Operation(id = CreateDemoDataOp.ID, category = Constants.CAT_SERVICES, label = "InsuranceClaims: Create Demo Data", description = "Values for deletePreviousClaimsStr: true or false")
 public class CreateDemoDataOp {
     
     public static final String ID = "CreateDemoDataOp";
@@ -46,14 +47,20 @@ public class CreateDemoDataOp {
     @Param(name = "parentDoc", required = true)
     protected DocumentModel parentDoc;
 
-    @Param(name = "howMany", required = false)
+    @Param(name = "howMany", required = false, values = { "100000"})
     protected long howMany = 0;
 
-    @Param(name = "commitModulo", required = false)
+    @Param(name = "commitModulo", required = false, values = { "50"})
     protected long commitModulo = 0;
 
     @Param(name = "logModulo", required = false)
     protected long logModulo = 0;
+
+    @Param(name = "yieldToBgWorkModulo", required = false)
+    protected long yieldToBgWorkModulo = 0;
+
+    @Param(name = "deletePreviousClaimsStr", required = false, values = { "true" })
+    protected String deletePreviousClaimsStr;
 
     @OperationMethod
     public void run() throws IOException, DocumentException, LifeCycleException {
@@ -62,7 +69,17 @@ public class CreateDemoDataOp {
         CreateDataDemoWork theWork = new CreateDataDemoWork(parentDoc);
         theWork.setCommitModulo((int) commitModulo);
         theWork.setLogModulo((int) logModulo);
+        theWork.setYieldToBgWorkModulo((int) yieldToBgWorkModulo);
         theWork.setHowMany((int) howMany);
+        
+        boolean deletePrevious;
+        if(StringUtils.isBlank(deletePreviousClaimsStr)) {
+            deletePrevious = CreateDemoData.DEFAULT_DELETE_PREVIOUS_CLAIMS;
+        } else {
+            deletePrevious = deletePreviousClaimsStr.equals("true");
+        }
+        theWork.setDeletePreviousClaims(deletePrevious);
+        
         wm.schedule(theWork, Scheduling.IF_NOT_RUNNING_OR_SCHEDULED);
         
     }

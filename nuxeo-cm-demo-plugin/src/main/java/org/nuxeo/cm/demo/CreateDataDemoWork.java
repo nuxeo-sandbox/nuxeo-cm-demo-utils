@@ -27,7 +27,8 @@ import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
 
 /**
- * 
+ * The misc. values (howMany, commitModulo, ...) cannot be modified after the
+ * creation of data has started. No error is thrown, but an error is logged
  *
  * @since 7.1
  */
@@ -40,12 +41,18 @@ public class CreateDataDemoWork extends AbstractWork {
     public static final String CATEGORY_CREATE_DATA_DEMO = "CreateCMDataDemo";
 
     protected final DocumentModel parentDoc;
+
+    protected int howMany = CreateDemoData.DEFAULT_HOW_MANY;
+
+    protected int commitModulo = CreateDemoData.DEFAULT_COMMIT_MODULO;
+
+    protected int logModulo = CreateDemoData.DEFAULT_LOG_MODULO;
+
+    protected int yieldToBgWorkModulo = CreateDemoData.DEFAULT_YIELD_TO_BG_WORK_MODULO;
     
-    protected int howMany = 0;
-    
-    protected int commitModulo = 0;
-    
-    protected int logModulo = 0;
+    protected boolean deletePreviousClaims = CreateDemoData.DEFAULT_DELETE_PREVIOUS_CLAIMS;
+
+    protected boolean started = false;
 
     public CreateDataDemoWork(DocumentModel inParent) {
         super();
@@ -59,45 +66,80 @@ public class CreateDataDemoWork extends AbstractWork {
 
     @Override
     public void work() {
-        
+
         boolean withError = false;
         setStatus("Creating data demo");
         CoreSession session = initSession();
-        
+
         CreateDemoData cdd = new CreateDemoData(session, parentDoc, howMany);
         cdd.setCommitModulo(commitModulo);
         cdd.setLogModulo(logModulo);
+        cdd.setYieldToBgWorkModulo(yieldToBgWorkModulo);
+        cdd.setDeletePreviousClaims(deletePreviousClaims);
+        
         cdd.setWorker(this);
         try {
+            started = true;
             cdd.run();
         } catch (IOException | DocumentException | LifeCycleException e) {
             withError = true;
             log.error("Data-demo creation interrupted with an error", e);
         }
-        
+
         String status = "Creating data demo: Done";
-        if(withError) {
+        if (withError) {
             status += " (with error. Check the log for details)";
         }
         setStatus(status);
-        
+        started = false;
+
     }
 
     @Override
     public String getCategory() {
         return CATEGORY_CREATE_DATA_DEMO;
     }
-    
+
     public void setCommitModulo(int inValue) {
-        commitModulo = inValue;
+        if (started) {
+            log.error("Cannot change the value of commitModulo because creation of data is running.");
+        } else {
+            commitModulo = inValue;
+        }
     }
-    
+
     public void setLogModulo(int inValue) {
-        logModulo = inValue;
+        if (started) {
+            log.error("Cannot change the value of logModulo because creation of data is running.");
+        } else {
+            logModulo = inValue;
+        }
+    }
+
+    public void setHowMany(int inValue) {
+        if (started) {
+            log.error("Cannot change the value of howMany because creation of data is running.");
+        } else {
+            howMany = inValue;
+        }
+    }
+
+    public void setYieldToBgWorkModulo(int inValue) {
+
+        if (started) {
+            log.error("Cannot change the value of yieldToBgWorkModulo because creation of data is running.");
+        } else {
+            yieldToBgWorkModulo = inValue;
+        }
     }
     
-    public void setHowMany(int inValue) {
-        howMany = inValue;
+    public void setDeletePreviousClaims(boolean inValue) {
+
+        if (started) {
+            log.error("Cannot change the value of deletePreviousClaims because creation of data is running.");
+        } else {
+            deletePreviousClaims = inValue;
+        }
     }
 
 }
