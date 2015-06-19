@@ -39,6 +39,7 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
+import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
@@ -317,7 +318,9 @@ public class CreateDemoData {
             // Also, when creating a lot of Claims, we want to let background
             // work to be able to breath a bit.
             if ((i % yieldToBgWorkModulo) == 0) {
-                MiscUtils.waitForBackgroundWorkCompletion(MAX_BG_WORKERS_BEFORE_SLEEP, 5000);
+                MiscUtils.waitForBackgroundWorkCompletion(
+                        MAX_BG_WORKERS_BEFORE_SLEEP, 5000,
+                        CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO);
             }
         }
 

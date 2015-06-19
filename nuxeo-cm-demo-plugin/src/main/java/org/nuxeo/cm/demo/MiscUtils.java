@@ -18,6 +18,7 @@ package org.nuxeo.cm.demo;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.runtime.api.Framework;
 
@@ -27,12 +28,32 @@ import org.nuxeo.runtime.api.Framework;
 public class MiscUtils {
 
     protected static WorkManager workManager;
+    
+
 
     public static void waitForBackgroundWorkCompletion(int inMaxWorkers,
             int inTimeout) {
+        waitForBackgroundWorkCompletion(inMaxWorkers, inTimeout);
+    }
+
+    public static void waitForBackgroundWorkCompletion(int inMaxWorkers,
+            int inTimeout, String inDoNotCountThisCategory) {
+        
+        if(inTimeout < 0) {
+            throw new IllegalArgumentException("The timeout can not be less or equal to zero (received: " + inTimeout + ")");
+        }
+        
+        if(inMaxWorkers < 1) {
+            return;
+        }
 
         if (workManager == null) {
             workManager = Framework.getLocalService(WorkManager.class);
+        }
+        
+        String ignoreQueueId = "";
+        if(StringUtils.isNotBlank(inDoNotCountThisCategory)) {
+            ignoreQueueId = workManager.getCategoryQueueId(inDoNotCountThisCategory);
         }
         
         int count;
@@ -42,7 +63,9 @@ public class MiscUtils {
             count = 0;
             queueIds = workManager.getWorkQueueIds();
             for (String oneQueue : queueIds) {
-                count += workManager.getQueueSize(oneQueue, null);
+                if(!oneQueue.equals(ignoreQueueId)) {
+                    count += workManager.getQueueSize(oneQueue, null);
+                }
             }
 
             if (count > inMaxWorkers) {
