@@ -45,21 +45,26 @@ import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
 
 /**
- * Creates 100,000 cases by default, dispatched on 3 years
+ * Creates cases (100,000 by default), dispatched on 3 years
  * 
  * Very specific to the "CM-SHOWCASE" Studio project and its schemas, etc.
  * 
  * Also this is supposed to be about a one shot thing. Once the data is created
  * and you are happy with it, just dump the db and import it in a new database
  * (and run the "Update All Dates" utilities)
- *
- * @since 7.2
- */
-/*
+ * 
+ * It is a single threaded creation because we are no really concerned with
+ * performance here. Still, we don't want to overload nuxeo, the db, the cpus,
+ * ... with the background work running (full text indexing, elastic search
+ * indexing, ...). This is why we regularly yield to the background jobs. This
+ * permits to avoid timeout errors for some of these threads.
+ * 
  * ================= WARNING WARNING WARNING WARNING WARNING =================
  * About changing the lifecycle state, we are using code that bypasses a lot of
  * controls (so we avoid event sent, etc.).
  * ============================================================================
+ *
+ * @since 7.2
  */
 public class CreateDemoData {
 
@@ -68,7 +73,7 @@ public class CreateDemoData {
     protected static final int DEFAULT_HOW_MANY = 100000;
 
     protected static final int DEFAULT_YIELD_TO_BG_WORK_MODULO = 500;
-    
+
     protected static final int DEFAULT_COMMIT_MODULO = 50;
 
     protected static final int DEFAULT_LOG_MODULO = 250;
@@ -295,7 +300,7 @@ public class CreateDemoData {
         THREE_MONTHS_AGO.set(someMonthsAgo.get(Calendar.YEAR),
                 someMonthsAgo.get(Calendar.MONTH),
                 someMonthsAgo.get(Calendar.DAY_OF_MONTH));
-        
+
         ONE_WEEK_AGO = Calendar.getInstance();
         ONE_WEEK_AGO.add(Calendar.DATE, -6);
 
@@ -399,7 +404,7 @@ public class CreateDemoData {
 
         DocumentModel claim = session.createDocumentModel(parentPath, title,
                 "InsuranceClaim");
-        
+
         claim.setPropertyValue("incl:tag_created_for_demo", true);
 
         claim.setPropertyValue("dc:title", title);
@@ -454,7 +459,7 @@ public class CreateDemoData {
                 + " "
                 + LOCATION_STREETS[ToolsMisc.randomInt(0, LOCATION_STREETS_MAX)];
         claim.setPropertyValue("incl:incident_location", someStr);
-        setCityAndState(claim);
+        setCityStateLatAndLong(claim);
 
         claim.setPropertyValue("incl:due_date",
                 RandomDates.buildDate(claimCreation, 15, 40, false));
@@ -475,14 +480,15 @@ public class CreateDemoData {
         // So year-3 = 27% of the total, year-2 = 32 and current year = 41
         int r = ToolsMisc.randomInt(1, 100);
         Calendar creation;
-        
+
         if (r < 28) {
             creation = RandomDates.buildDate(startDate_3years, 1, 365, false);
         } else if (r < 59) {
             creation = RandomDates.buildDate(startDate_2years, 1, 365, false);
         } else {
-            if(ToolsMisc.randomInt(1, 100) > 94) {
-                creation = RandomDates.addDays(ONE_WEEK_AGO, ToolsMisc.randomInt(1, 7), true);
+            if (ToolsMisc.randomInt(1, 100) > 94) {
+                creation = RandomDates.addDays(ONE_WEEK_AGO,
+                        ToolsMisc.randomInt(1, 7), true);
             } else {
                 creation = RandomDates.buildDate(startDate_1year, 1, 365, false);
             }
@@ -500,7 +506,12 @@ public class CreateDemoData {
 
     }
 
-    protected void setCityAndState(DocumentModel inClaim) {
+    /*
+     * As of today, we don't set lat./long. based on an exact address because
+     * our addresses are fake. So we just store the lat./long. of the city
+     * itself.
+     */
+    protected void setCityStateLatAndLong(DocumentModel inClaim) {
 
         USZip zip;
         // The "main_states" are at least 30% of the total (they will be more
@@ -514,6 +525,8 @@ public class CreateDemoData {
 
         inClaim.setPropertyValue("incl:incident_city", zip.city);
         inClaim.setPropertyValue("incl:incident_us_state", zip.state);
+        inClaim.setPropertyValue("incl:incident_latitude", zip.latitude);
+        inClaim.setPropertyValue("incl:incident_longitude", zip.longitude);
 
     }
 
@@ -632,7 +645,7 @@ public class CreateDemoData {
                     WHY_REJECTED[ToolsMisc.randomInt(0, WHY_REJECTED_MAX)]);
         } else {
             if (lifeCycleWithOnSite.compareStates(newState, "Evaluated") >= 0) {
-                // Say we had around 30% of expert on site?
+                // Say we had around 30% of "expert on site"
                 oneClaim.setPropertyValue("incl:valuation_on_site",
                         ToolsMisc.randomInt(1, 100) < 35);
 
@@ -698,6 +711,8 @@ public class CreateDemoData {
                         til.incrementCounter();
                         til.commitOrRollbackIfNeeded();
                     }
+                    doLogAndWorkerStatus("    'InsuranceClaim': " + count
+                            + "deleted");
                 }
             } while (docs.size() > 0);
             til.commitAndStartNewTransaction();
@@ -736,7 +751,8 @@ public class CreateDemoData {
     }
 
     public void setYieldToBgWorkModulo(int inValue) {
-        yieldToBgWorkModulo = inValue > 0 ? inValue : DEFAULT_YIELD_TO_BG_WORK_MODULO;
+        yieldToBgWorkModulo = inValue > 0 ? inValue
+                : DEFAULT_YIELD_TO_BG_WORK_MODULO;
     }
 
 }
