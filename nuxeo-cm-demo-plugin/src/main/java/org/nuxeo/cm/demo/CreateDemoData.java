@@ -302,7 +302,7 @@ public class CreateDemoData {
                 someMonthsAgo.get(Calendar.DAY_OF_MONTH));
 
         ONE_WEEK_AGO = Calendar.getInstance();
-        ONE_WEEK_AGO.add(Calendar.DATE, -6);
+        ONE_WEEK_AGO.add(Calendar.DATE, -7);
 
     }
 
@@ -486,9 +486,9 @@ public class CreateDemoData {
         } else if (r < 59) {
             creation = RandomDates.buildDate(startDate_2years, 1, 365, false);
         } else {
-            if (ToolsMisc.randomInt(1, 100) > 94) {
-                creation = RandomDates.addDays(ONE_WEEK_AGO,
-                        ToolsMisc.randomInt(1, 7), true);
+            // Just a bit more in the last week.
+            if (ToolsMisc.randomInt(1, 100) > 95) {
+                creation = RandomDates.buildDate(ONE_WEEK_AGO, 0, 7, false);
             } else {
                 creation = RandomDates.buildDate(startDate_1year, 1, 365, false);
             }
@@ -700,7 +700,7 @@ public class CreateDemoData {
             til.commitAndStartNewTransaction();
             int count = 0;
             do {
-                docs = session.query(nxql);
+                docs = session.query(nxql, 200);
                 if (docs.size() > 0) {
                     count += docs.size();
                     doLogAndWorkerStatus("    Deleting " + docs.size()
