@@ -16,7 +16,13 @@
  */
 package org.nuxeo.cm.demo;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -158,6 +164,8 @@ public class CreateDemoData {
 
     protected Calendar claimCreation;
 
+    protected File fileUSZipsForCM;
+
     /*
      * Depending on the lifecycle, we can have more or less info. For example, a
      * value for the estimate and the repaid amount
@@ -219,6 +227,9 @@ public class CreateDemoData {
         createData();
         RandomFirstLastNames.release();
         RandomUSZips.release();
+        if (fileUSZipsForCM != null && fileUSZipsForCM.exists()) {
+            fileUSZipsForCM.delete();
+        }
         endTime = System.currentTimeMillis();
         creationDuration = endTime - startTime;
 
@@ -263,7 +274,8 @@ public class CreateDemoData {
         howMany = howMany <= 0 ? DEFAULT_HOW_MANY : howMany;
 
         firstLastNames = RandomFirstLastNames.getInstance();
-        usZips = RandomUSZips.getInstance();
+        
+        setupCitiesAndStates();
 
         setupLifeCycleDef();
 
@@ -304,6 +316,33 @@ public class CreateDemoData {
         ONE_WEEK_AGO = Calendar.getInstance();
         ONE_WEEK_AGO.add(Calendar.DATE, -7);
 
+    }
+    
+    /*
+     * We use our custom ZIP files (with more New York, Orlando, ...
+     * 
+     * nuxeo-datademo can't read file that is in _my_ jar, we must duplicate it.
+     * 
+     * (and we don't try-catch, let's fail in case of problem)
+     */
+    protected void setupCitiesAndStates() throws IOException {
+
+        InputStream in = null;
+        OutputStream out = null;
+        
+        fileUSZipsForCM = File.createTempFile("cmdemo", ".txt");
+        fileUSZipsForCM.createNewFile();
+        
+        in = getClass().getResourceAsStream("/files/US-zips-special-cm.txt");
+        out = new FileOutputStream(fileUSZipsForCM);
+        byte[] buffer = new byte[4096];
+        int length;
+        while ((length = in.read(buffer)) > 0) {
+            out.write(buffer, 0, length);
+        }
+        in.close();
+        out.close();
+        usZips = RandomUSZips.getInstance(fileUSZipsForCM.getAbsolutePath());
     }
 
     protected void setupLifeCycleDef() {
@@ -695,7 +734,7 @@ public class CreateDemoData {
                     + parentPath + "'";
             DocumentModelList docs;
 
-            doLogAndWorkerStatus("Deleting previous 'InsuranceClaim'...");
+            doLogAndWorkerStatus("Deleting previous InsuranceClaim...");
             TransactionInLoop til = new TransactionInLoop(session);
             til.commitAndStartNewTransaction();
             int count = 0;
@@ -703,20 +742,18 @@ public class CreateDemoData {
                 docs = session.query(nxql, 200);
                 if (docs.size() > 0) {
                     count += docs.size();
-                    doLogAndWorkerStatus("    Deleting " + docs.size()
-                            + " 'InsuranceClaim'");
                     for (DocumentModel oneDoc : docs) {
                         session.removeDocument(oneDoc.getRef());
 
                         til.incrementCounter();
                         til.commitOrRollbackIfNeeded();
                     }
-                    doLogAndWorkerStatus("    'InsuranceClaim': " + count
-                            + "deleted");
+                    doLogAndWorkerStatus("    InsuranceClaim: " + count
+                            + " deleted...");
                 }
             } while (docs.size() > 0);
             til.commitAndStartNewTransaction();
-            doLogAndWorkerStatus("...Deleting previous 'InsuranceClaim' done: "
+            doLogAndWorkerStatus("...Deleting previous InsuranceClaim done: "
                     + count + " 'InsuranceClaim' deleted");
 
         }
