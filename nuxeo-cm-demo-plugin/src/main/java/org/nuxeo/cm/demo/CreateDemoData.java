@@ -83,6 +83,10 @@ public class CreateDemoData {
     protected static final int DEFAULT_LOG_MODULO = 250;
 
     protected static final boolean DEFAULT_DELETE_PREVIOUS_CLAIMS = true;
+    
+    protected static final int DEFAULT_SLEEP_MODULO = 500;
+    
+    protected static final int DEFAULT_SLEEP_DURATION_MS = 500;
 
     // Every yieldToBgWorkModulo, we sleep until there are max
     // MIN_BG_WORKERS_FOR_SLEEP active workers
@@ -151,6 +155,10 @@ public class CreateDemoData {
     protected int commitModulo = 0;
 
     protected int yieldToBgWorkModulo = DEFAULT_YIELD_TO_BG_WORK_MODULO;
+    
+    protected int sleepModulo = DEFAULT_SLEEP_MODULO;
+    
+    protected int sleepDurationMs = DEFAULT_SLEEP_DURATION_MS;
 
     protected RandomFirstLastNames firstLastNames;
 
@@ -417,10 +425,11 @@ public class CreateDemoData {
                 MiscUtils.waitForBackgroundWorkCompletion(
                         MAX_BG_WORKERS_BEFORE_SLEEP, 5000,
                         CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO);
-                // We also still give a bit more time to breath
-                // (should be a parameter though)
+            }
+            
+            if((i % sleepModulo) == 0) {
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(sleepDurationMs);
                 } catch (InterruptedException e) {
                     // ignore
                 }
@@ -795,6 +804,22 @@ public class CreateDemoData {
     public void setYieldToBgWorkModulo(int inValue) {
         yieldToBgWorkModulo = inValue > 0 ? inValue
                 : DEFAULT_YIELD_TO_BG_WORK_MODULO;
+    }
+
+    public int getSleepModulo() {
+        return sleepModulo;
+    }
+
+    public void setSleepModulo(int inValue) {
+        sleepModulo = inValue < 1 ? DEFAULT_SLEEP_MODULO : inValue;
+    }
+
+    public int getSleepDurationMs() {
+        return sleepDurationMs;
+    }
+
+    public void setSleepDurationMs(int inValue) {
+        sleepDurationMs = inValue < 1 ? DEFAULT_SLEEP_DURATION_MS : inValue;
     }
 
 }
