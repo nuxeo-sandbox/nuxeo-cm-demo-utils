@@ -417,6 +417,13 @@ public class CreateDemoData {
                 MiscUtils.waitForBackgroundWorkCompletion(
                         MAX_BG_WORKERS_BEFORE_SLEEP, 5000,
                         CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO);
+                // We also still give a bit more time to breath
+                // (should be a parameter though)
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
             }
         }
 
