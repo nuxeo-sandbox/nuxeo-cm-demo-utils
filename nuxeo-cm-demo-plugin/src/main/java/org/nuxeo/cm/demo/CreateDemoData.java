@@ -87,6 +87,8 @@ public class CreateDemoData {
     protected static final int DEFAULT_SLEEP_MODULO = 500;
     
     protected static final int DEFAULT_SLEEP_DURATION_MS = 500;
+    
+    protected static final int DEFAULT_SLEEP_DURATION_AFTER_COMMIT = 100;
 
     // Every yieldToBgWorkModulo, we sleep until there are max
     // MIN_BG_WORKERS_FOR_SLEEP active workers
@@ -159,6 +161,8 @@ public class CreateDemoData {
     protected int sleepModulo = DEFAULT_SLEEP_MODULO;
     
     protected int sleepDurationMs = DEFAULT_SLEEP_DURATION_MS;
+    
+    protected int sleepDurationAfterCommit = DEFAULT_SLEEP_DURATION_AFTER_COMMIT;
 
     protected RandomFirstLastNames firstLastNames;
 
@@ -393,9 +397,16 @@ public class CreateDemoData {
         TransactionInLoop til = new TransactionInLoop(session);
         til.commitAndStartNewTransaction();
         til.setCommitModulo(commitModulo);
-        ToolsMisc.forceLogInfo(log,
-                "Creation of 'InsuranceClaim' with:\n    howMany: " + howMany
-                        + "\n    commitModulo: " + til.getCommitModulo());
+        til.setSleepDurationAfterCommit(sleepDurationAfterCommit);
+        String logInfo = "Creation of InsuranceClaim documents:";
+        logInfo += "\n    howMany: " + howMany;
+        logInfo += "\n    commitModulo: " + commitModulo;
+        logInfo += "\n    logModulo: " + logModulo;
+        logInfo += "\n    yieldToBgWorkModulo: " + yieldToBgWorkModulo;
+        logInfo += "\n    sleepDurationAfterCommit: " + sleepDurationAfterCommit;
+        logInfo += "\n    sleepModulo: " + sleepModulo;
+        logInfo += "\n    sleepDurationMs: " + sleepDurationMs;
+        ToolsMisc.forceLogInfo(log, logInfo);
 
         for (int i = 1; i <= howMany; i++) {
             DocumentModel theClaim = createNewInsuranceClaim();
@@ -820,6 +831,14 @@ public class CreateDemoData {
 
     public void setSleepDurationMs(int inValue) {
         sleepDurationMs = inValue < 1 ? DEFAULT_SLEEP_DURATION_MS : inValue;
+    }
+
+    public int getSleepDurationAfterCommit() {
+        return sleepDurationAfterCommit;
+    }
+
+    public void setSleepDurationAfterCommit(int inValue) {
+        sleepDurationAfterCommit = inValue < 1 ? DEFAULT_SLEEP_DURATION_AFTER_COMMIT : inValue;
     }
 
 }
