@@ -47,6 +47,9 @@ public class CreateDemoDataOp {
     @Param(name = "parentDoc", required = true)
     protected DocumentModel parentDoc;
 
+    @Param(name = "deletePreviousClaimsStr", required = false, values = { "true" })
+    protected String deletePreviousClaimsStr;
+
     @Param(name = "howMany", required = false, values = { "100000"})
     protected long howMany = 0;
 
@@ -59,18 +62,17 @@ public class CreateDemoDataOp {
     @Param(name = "yieldToBgWorkModulo", required = false)
     protected long yieldToBgWorkModulo = 0;
 
-    @Param(name = "deletePreviousClaimsStr", required = false, values = { "true" })
-    protected String deletePreviousClaimsStr;
+    @Param(name = "sleepDurationAfterCommit", required = false)
+    protected long sleepDurationAfterCommit = 0;
+
+    @Param(name = "sleepModulo", required = false)
+    protected long sleepModulo = 0;
+
+    @Param(name = "sleepDurationMs", required = false)
+    protected long sleepDurationMs = 0;
 
     @OperationMethod
     public void run() throws IOException, DocumentException, LifeCycleException {
-
-        WorkManager wm = Framework.getService(WorkManager.class);
-        CreateDataDemoWork theWork = new CreateDataDemoWork(parentDoc);
-        theWork.setCommitModulo((int) commitModulo);
-        theWork.setLogModulo((int) logModulo);
-        theWork.setYieldToBgWorkModulo((int) yieldToBgWorkModulo);
-        theWork.setHowMany((int) howMany);
         
         boolean deletePrevious;
         if(StringUtils.isBlank(deletePreviousClaimsStr)) {
@@ -78,7 +80,18 @@ public class CreateDemoDataOp {
         } else {
             deletePrevious = deletePreviousClaimsStr.equals("true");
         }
+
+        WorkManager wm = Framework.getService(WorkManager.class);
+        
+        CreateDataDemoWork theWork = new CreateDataDemoWork(parentDoc);
         theWork.setDeletePreviousClaims(deletePrevious);
+        theWork.setHowMany((int) howMany);
+        theWork.setCommitModulo((int) commitModulo);
+        theWork.setLogModulo((int) logModulo);
+        theWork.setYieldToBgWorkModulo((int) yieldToBgWorkModulo);
+        theWork.setSleepDurationAfterCommit((int) sleepDurationAfterCommit);
+        theWork.setSleepModulo((int) sleepModulo);
+        theWork.setSleepDurationMs((int) sleepDurationMs);
         
         wm.schedule(theWork, Scheduling.IF_NOT_RUNNING_OR_SCHEDULED);
         

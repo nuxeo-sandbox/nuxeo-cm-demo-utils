@@ -41,6 +41,8 @@ public class CreateDataDemoWork extends AbstractWork {
     public static final String CATEGORY_CREATE_DATA_DEMO = "CreateCMDataDemo";
 
     protected final DocumentModel parentDoc;
+    
+    protected boolean deletePreviousClaims = CreateDemoData.DEFAULT_DELETE_PREVIOUS_CLAIMS;
 
     protected int howMany = CreateDemoData.DEFAULT_HOW_MANY;
 
@@ -49,8 +51,12 @@ public class CreateDataDemoWork extends AbstractWork {
     protected int logModulo = CreateDemoData.DEFAULT_LOG_MODULO;
 
     protected int yieldToBgWorkModulo = CreateDemoData.DEFAULT_YIELD_TO_BG_WORK_MODULO;
-    
-    protected boolean deletePreviousClaims = CreateDemoData.DEFAULT_DELETE_PREVIOUS_CLAIMS;
+
+    protected int sleepDurationAfterCommit = CreateDemoData.DEFAULT_SLEEP_DURATION_AFTER_COMMIT;
+
+    protected int sleepModulo = CreateDemoData.DEFAULT_SLEEP_MODULO;
+
+    protected int sleepDurationMs = CreateDemoData.DEFAULT_SLEEP_DURATION_MS;
 
     protected boolean started = false;
 
@@ -69,13 +75,16 @@ public class CreateDataDemoWork extends AbstractWork {
 
         boolean withError = false;
         setStatus("Creating data demo");
+        
         CoreSession session = initSession();
+        String logInfo = "ABC Worker#initSession() just called";
+        logInfo += "\nSession id: " + session.getSessionId();
 
         CreateDemoData cdd = new CreateDemoData(session, parentDoc, howMany);
+        cdd.setDeletePreviousClaims(deletePreviousClaims);
         cdd.setCommitModulo(commitModulo);
         cdd.setLogModulo(logModulo);
         cdd.setYieldToBgWorkModulo(yieldToBgWorkModulo);
-        cdd.setDeletePreviousClaims(deletePreviousClaims);
         
         cdd.setWorker(this);
         try {
@@ -99,6 +108,23 @@ public class CreateDataDemoWork extends AbstractWork {
     public String getCategory() {
         return CATEGORY_CREATE_DATA_DEMO;
     }
+    
+    public void setDeletePreviousClaims(boolean inValue) {
+
+        if (started) {
+            log.error("Cannot change the value of deletePreviousClaims because creation of data is running.");
+        } else {
+            deletePreviousClaims = inValue;
+        }
+    }
+
+    public void setHowMany(int inValue) {
+        if (started) {
+            log.error("Cannot change the value of howMany because creation of data is running.");
+        } else {
+            howMany = inValue;
+        }
+    }
 
     public void setCommitModulo(int inValue) {
         if (started) {
@@ -116,14 +142,6 @@ public class CreateDataDemoWork extends AbstractWork {
         }
     }
 
-    public void setHowMany(int inValue) {
-        if (started) {
-            log.error("Cannot change the value of howMany because creation of data is running.");
-        } else {
-            howMany = inValue;
-        }
-    }
-
     public void setYieldToBgWorkModulo(int inValue) {
 
         if (started) {
@@ -132,14 +150,17 @@ public class CreateDataDemoWork extends AbstractWork {
             yieldToBgWorkModulo = inValue;
         }
     }
-    
-    public void setDeletePreviousClaims(boolean inValue) {
 
-        if (started) {
-            log.error("Cannot change the value of deletePreviousClaims because creation of data is running.");
-        } else {
-            deletePreviousClaims = inValue;
-        }
+    public void setSleepDurationAfterCommit(int inValue) {
+        sleepDurationAfterCommit = inValue;
+    }
+
+    public void setSleepModulo(int inValue) {
+        sleepModulo = inValue;
+    }
+
+    public void setSleepDurationMs(int inValue) {
+        sleepDurationMs = inValue;
     }
 
 }

@@ -83,16 +83,16 @@ public class CreateDemoData {
     protected static final int DEFAULT_LOG_MODULO = 250;
 
     protected static final boolean DEFAULT_DELETE_PREVIOUS_CLAIMS = true;
-    
-    protected static final int DEFAULT_SLEEP_MODULO = 500;
-    
+
+    protected static final int DEFAULT_SLEEP_MODULO = 300;
+
     protected static final int DEFAULT_SLEEP_DURATION_MS = 500;
-    
+
     protected static final int DEFAULT_SLEEP_DURATION_AFTER_COMMIT = 100;
 
     // Every yieldToBgWorkModulo, we sleep until there are max
     // MIN_BG_WORKERS_FOR_SLEEP active workers
-    public static int MAX_BG_WORKERS_BEFORE_SLEEP = 10;
+    public static int MAX_BG_WORKERS_BEFORE_SLEEP = 20;
 
     protected static final Calendar TODAY = Calendar.getInstance();
 
@@ -157,11 +157,11 @@ public class CreateDemoData {
     protected int commitModulo = 0;
 
     protected int yieldToBgWorkModulo = DEFAULT_YIELD_TO_BG_WORK_MODULO;
-    
+
     protected int sleepModulo = DEFAULT_SLEEP_MODULO;
-    
+
     protected int sleepDurationMs = DEFAULT_SLEEP_DURATION_MS;
-    
+
     protected int sleepDurationAfterCommit = DEFAULT_SLEEP_DURATION_AFTER_COMMIT;
 
     protected RandomFirstLastNames firstLastNames;
@@ -284,7 +284,7 @@ public class CreateDemoData {
         howMany = howMany <= 0 ? DEFAULT_HOW_MANY : howMany;
 
         firstLastNames = RandomFirstLastNames.getInstance();
-        
+
         setupCitiesAndStates();
 
         setupLifeCycleDef();
@@ -327,7 +327,7 @@ public class CreateDemoData {
         ONE_WEEK_AGO.add(Calendar.DATE, -7);
 
     }
-    
+
     /*
      * We use our custom ZIP files (with more New York, Orlando, ...
      * 
@@ -339,10 +339,10 @@ public class CreateDemoData {
 
         InputStream in = null;
         OutputStream out = null;
-        
+
         fileUSZipsForCM = File.createTempFile("cmdemo", ".txt");
         fileUSZipsForCM.createNewFile();
-        
+
         in = getClass().getResourceAsStream("/files/US-zips-special-cm.txt");
         out = new FileOutputStream(fileUSZipsForCM);
         byte[] buffer = new byte[4096];
@@ -397,31 +397,36 @@ public class CreateDemoData {
         TransactionInLoop til = new TransactionInLoop(session);
         til.commitAndStartNewTransaction();
         til.setCommitModulo(commitModulo);
+        
         til.setSleepDurationAfterCommit(sleepDurationAfterCommit);
+ 
         String logInfo = "Creation of InsuranceClaim documents:";
         logInfo += "\n    howMany: " + howMany;
         logInfo += "\n    commitModulo: " + commitModulo;
         logInfo += "\n    logModulo: " + logModulo;
         logInfo += "\n    yieldToBgWorkModulo: " + yieldToBgWorkModulo;
-        logInfo += "\n    sleepDurationAfterCommit: " + sleepDurationAfterCommit;
+        logInfo += "\n    sleepDurationAfterCommit: "
+                + sleepDurationAfterCommit;
         logInfo += "\n    sleepModulo: " + sleepModulo;
         logInfo += "\n    sleepDurationMs: " + sleepDurationMs;
         ToolsMisc.forceLogInfo(log, logInfo);
 
         for (int i = 1; i <= howMany; i++) {
+            // Create and save the claim
             DocumentModel theClaim = createNewInsuranceClaim();
+            //disableListeners(theClaim);
+            //theClaim = session.saveDocument(theClaim);
 
-            // Update lifecycle _after_ creation and save because the lowlevel
-            // routines expect the document to already exist in the db beore
-            // being able to change the lifecycle state
-            // Notice that we also update the document depending on the
-            // lifecycle: valuation for example
-            disableListeners(theClaim);
+            // Handle lifecycle and related data (valuation_on_site, ...) that
+            // depends on the lifecycle state
+            //disableListeners(theClaim);
             theClaim = updateLifecycleStateAndRelatedData(theClaim);
-            // Now save the document itself
+
+            // Save and possibly commit the transaction
             disableListeners(theClaim);
             theClaim = til.saveDocumentAndCommitIfNeeded(theClaim);
 
+            // Log
             if ((i % logModulo) == 0) {
                 doLogAndWorkerStatus("InsuranceClaim creation: " + i + "/"
                         + howMany);
@@ -431,14 +436,16 @@ public class CreateDemoData {
             }
 
             // Also, when creating a lot of Claims, we want to let background
-            // work to be able to breath a bit.
+            // work (full text indexing, ...) to finish, or we will have way to
+            // more of them and it will fail
             if ((i % yieldToBgWorkModulo) == 0) {
                 MiscUtils.waitForBackgroundWorkCompletion(
                         MAX_BG_WORKERS_BEFORE_SLEEP, 5000,
                         CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO);
             }
-            
-            if((i % sleepModulo) == 0) {
+
+            // Now we also want to give time to the database maybe?
+            if ((i % sleepModulo) == 0) {
                 try {
                     Thread.sleep(sleepDurationMs);
                 } catch (InterruptedException e) {
@@ -528,11 +535,7 @@ public class CreateDemoData {
         claim.setPropertyValue("incl:due_date",
                 RandomDates.buildDate(claimCreation, 15, 40, false));
 
-        // Disable DublinCore
-        claim.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
-                true);
-        // Make sure events are not triggered
-        claim.putContextData("UpdatingData_NoEventPlease", true);
+        disableListeners(claim);
         claim = session.createDocument(claim);
 
         return claim;
@@ -838,7 +841,8 @@ public class CreateDemoData {
     }
 
     public void setSleepDurationAfterCommit(int inValue) {
-        sleepDurationAfterCommit = inValue < 1 ? DEFAULT_SLEEP_DURATION_AFTER_COMMIT : inValue;
+        sleepDurationAfterCommit = inValue < 1 ? DEFAULT_SLEEP_DURATION_AFTER_COMMIT
+                : inValue;
     }
 
 }
