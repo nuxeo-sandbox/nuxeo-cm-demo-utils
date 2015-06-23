@@ -20,12 +20,12 @@ package org.nuxeo.cm.demo;
 import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.automation.core.Constants;
-import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
-import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
@@ -41,8 +41,7 @@ public class CreateDemoDataOp {
     
     public static final String ID = "CreateDemoDataOp";
 
-    @Context
-    protected CoreSession session;
+    private static final Log log = LogFactory.getLog(CreateDemoDataOp.class);
 
     @Param(name = "parentDoc", required = true)
     protected DocumentModel parentDoc;
@@ -80,20 +79,26 @@ public class CreateDemoDataOp {
         } else {
             deletePrevious = deletePreviousClaimsStr.equals("true");
         }
-
-        WorkManager wm = Framework.getService(WorkManager.class);
         
-        CreateDataDemoWork theWork = new CreateDataDemoWork(parentDoc);
-        theWork.setDeletePreviousClaims(deletePrevious);
-        theWork.setHowMany((int) howMany);
-        theWork.setCommitModulo((int) commitModulo);
-        theWork.setLogModulo((int) logModulo);
-        theWork.setYieldToBgWorkModulo((int) yieldToBgWorkModulo);
-        theWork.setSleepDurationAfterCommit((int) sleepDurationAfterCommit);
-        theWork.setSleepModulo((int) sleepModulo);
-        theWork.setSleepDurationMs((int) sleepDurationMs);
-        
-        wm.schedule(theWork, Scheduling.IF_NOT_RUNNING_OR_SCHEDULED);
+        CreateDataDemoWork theWork = CreateDataDemoWork.getInstance();
+        if(theWork != null) {
+            log.warn("There already is a Create Demo Data worker running. We don't create a new one");
+        } else {
+            
+            WorkManager wm = Framework.getService(WorkManager.class);
+            
+            theWork = CreateDataDemoWork.getInstance(parentDoc);
+            theWork.setDeletePreviousClaims(deletePrevious);
+            theWork.setHowMany((int) howMany);
+            theWork.setCommitModulo((int) commitModulo);
+            theWork.setLogModulo((int) logModulo);
+            theWork.setYieldToBgWorkModulo((int) yieldToBgWorkModulo);
+            theWork.setSleepDurationAfterCommit((int) sleepDurationAfterCommit);
+            theWork.setSleepModulo((int) sleepModulo);
+            theWork.setSleepDurationMs((int) sleepDurationMs);
+            
+            wm.schedule(theWork, Scheduling.IF_NOT_RUNNING_OR_SCHEDULED);
+        }
         
     }
 

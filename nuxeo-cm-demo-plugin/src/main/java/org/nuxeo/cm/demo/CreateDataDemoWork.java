@@ -59,8 +59,34 @@ public class CreateDataDemoWork extends AbstractWork {
     protected int sleepDurationMs = CreateDemoData.DEFAULT_SLEEP_DURATION_MS;
 
     protected boolean started = false;
+    
+    protected boolean isRunning = false;
+    
+    protected CreateDemoData createDemoData;
+    
+    private static CreateDataDemoWork instance;
+    
+    private static final String LOCK = "CreateDataDemoWork";
+    
+    public static CreateDataDemoWork getInstance() {
+        return instance;
+    }
+    
+    public static CreateDataDemoWork getInstance(DocumentModel inParent) {
+        
+        if(instance == null) {
+            synchronized(LOCK) {
+                if(instance == null) {
+                    instance = new CreateDataDemoWork(inParent);
+                }
+            }
+        }
+        
+        return instance;
+    }
+    
 
-    public CreateDataDemoWork(DocumentModel inParent) {
+    private CreateDataDemoWork(DocumentModel inParent) {
         super();
         parentDoc = inParent;
     }
@@ -72,24 +98,24 @@ public class CreateDataDemoWork extends AbstractWork {
 
     @Override
     public void work() {
+        
+        isRunning = true;
 
         boolean withError = false;
         setStatus("Creating data demo");
         
         CoreSession session = initSession();
-        String logInfo = "ABC Worker#initSession() just called";
-        logInfo += "\nSession id: " + session.getSessionId();
 
-        CreateDemoData cdd = new CreateDemoData(session, parentDoc, howMany);
-        cdd.setDeletePreviousClaims(deletePreviousClaims);
-        cdd.setCommitModulo(commitModulo);
-        cdd.setLogModulo(logModulo);
-        cdd.setYieldToBgWorkModulo(yieldToBgWorkModulo);
+        createDemoData = new CreateDemoData(session, parentDoc, howMany);
+        createDemoData.setDeletePreviousClaims(deletePreviousClaims);
+        createDemoData.setCommitModulo(commitModulo);
+        createDemoData.setLogModulo(logModulo);
+        createDemoData.setYieldToBgWorkModulo(yieldToBgWorkModulo);
         
-        cdd.setWorker(this);
+        createDemoData.setWorker(this);
         try {
             started = true;
-            cdd.run();
+            createDemoData.run();
         } catch (IOException | DocumentException | LifeCycleException e) {
             withError = true;
             log.error("Data-demo creation interrupted with an error", e);
@@ -101,6 +127,8 @@ public class CreateDataDemoWork extends AbstractWork {
         }
         setStatus(status);
         started = false;
+        
+        isRunning = false;
 
     }
 
@@ -161,6 +189,32 @@ public class CreateDataDemoWork extends AbstractWork {
 
     public void setSleepDurationMs(int inValue) {
         sleepDurationMs = inValue;
+    }
+    
+    public void pause() {
+        if(createDemoData != null) {
+            createDemoData.pause();
+        }
+    }
+    
+    public void resume() {
+        if(createDemoData != null) {
+            createDemoData.resume();
+        }
+    }
+    
+    public void stop() {
+        if(createDemoData != null) {
+            createDemoData.stop();
+        }
+    }
+    
+    public CreateDemoData.RUNNING_STATUS getRunningStatus() {
+        if(createDemoData != null) {
+            return createDemoData.getStatus();
+        }
+        
+        return CreateDemoData.RUNNING_STATUS.UNKNOWN;
     }
 
 }

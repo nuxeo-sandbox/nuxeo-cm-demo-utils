@@ -94,6 +94,12 @@ public class CreateDemoData {
     // MIN_BG_WORKERS_FOR_SLEEP active workers
     public static int MAX_BG_WORKERS_BEFORE_SLEEP = 20;
 
+    public static enum RUNNING_STATUS {
+        PAUSED, RUNNING, STOPPED, UNKNOWN
+    };
+
+    protected RUNNING_STATUS status = RUNNING_STATUS.UNKNOWN;
+
     protected static final Calendar TODAY = Calendar.getInstance();
 
     protected static Calendar ONE_MONTH_AGO = Calendar.getInstance();
@@ -152,6 +158,8 @@ public class CreateDemoData {
 
     protected int howMany = 0;
 
+    protected int countCreated;
+
     protected String parentPath;
 
     protected int commitModulo = 0;
@@ -190,6 +198,8 @@ public class CreateDemoData {
 
     protected AbstractWork worker = null;
 
+    protected long creationStartTime;
+
     public CreateDemoData(CoreSession inSession, DocumentModel inParent) {
 
         session = inSession;
@@ -225,6 +235,9 @@ public class CreateDemoData {
 
         setup();
 
+        status = RUNNING_STATUS.RUNNING;
+        countCreated = 0;
+
         doLogAndWorkerStatus("Creation of " + howMany
                 + " 'InsuranceClaim': start");
 
@@ -233,7 +246,7 @@ public class CreateDemoData {
         endTime = System.currentTimeMillis();
         deletionDuration = endTime - startTime;
 
-        startTime = System.currentTimeMillis();
+        creationStartTime = System.currentTimeMillis();
         createData();
         RandomFirstLastNames.release();
         RandomUSZips.release();
@@ -241,9 +254,10 @@ public class CreateDemoData {
             fileUSZipsForCM.delete();
         }
         endTime = System.currentTimeMillis();
-        creationDuration = endTime - startTime;
+        creationDuration = endTime - creationStartTime;
 
-        String logStr = "Creation of " + howMany + " 'InsuranceClaim': end";
+        String logStr = "Creation of " + howMany + " 'InsuranceClaim': end ("
+                + countCreated + " created)";
         if (worker != null) {
             worker.setStatus(logStr);
         }
@@ -257,6 +271,24 @@ public class CreateDemoData {
                 + MiscUtils.millisecondsToToTimeFormat(creationDuration);
         ToolsMisc.forceLogInfo(log, logStr);
 
+        status = RUNNING_STATUS.STOPPED;
+
+    }
+
+    public void pause() {
+        status = RUNNING_STATUS.PAUSED;
+    }
+
+    public void resume() {
+        status = RUNNING_STATUS.RUNNING;
+    }
+
+    public void stop() {
+        status = RUNNING_STATUS.STOPPED;
+    }
+
+    public RUNNING_STATUS getStatus() {
+        return status;
     }
 
     protected boolean checkEnvironment() {
@@ -397,9 +429,9 @@ public class CreateDemoData {
         TransactionInLoop til = new TransactionInLoop(session);
         til.commitAndStartNewTransaction();
         til.setCommitModulo(commitModulo);
-        
+
         til.setSleepDurationAfterCommit(sleepDurationAfterCommit);
- 
+
         String logInfo = "Creation of InsuranceClaim documents:";
         logInfo += "\n    howMany: " + howMany;
         logInfo += "\n    commitModulo: " + commitModulo;
@@ -411,25 +443,32 @@ public class CreateDemoData {
         logInfo += "\n    sleepDurationMs: " + sleepDurationMs;
         ToolsMisc.forceLogInfo(log, logInfo);
 
+        countCreated = 0;
         for (int i = 1; i <= howMany; i++) {
+
             // Create and save the claim
             DocumentModel theClaim = createNewInsuranceClaim();
-            //disableListeners(theClaim);
-            //theClaim = session.saveDocument(theClaim);
 
             // Handle lifecycle and related data (valuation_on_site, ...) that
             // depends on the lifecycle state
-            //disableListeners(theClaim);
+            // disableListeners(theClaim);
             theClaim = updateLifecycleStateAndRelatedData(theClaim);
 
             // Save and possibly commit the transaction
             disableListeners(theClaim);
             theClaim = til.saveDocumentAndCommitIfNeeded(theClaim);
+            countCreated += 1;
 
             // Log
             if ((i % logModulo) == 0) {
-                doLogAndWorkerStatus("InsuranceClaim creation: " + i + "/"
-                        + howMany);
+                logInfo = "InsuranceClaim creation: " + i + "/" + howMany;
+                if ((i % 1000) == 0) {
+                    long theDuration = System.currentTimeMillis()
+                            - creationStartTime;
+                    logInfo += ", duration: "
+                            + MiscUtils.millisecondsToToTimeFormat(theDuration);
+                }
+                doLogAndWorkerStatus(logInfo);
                 if (worker != null) {
                     worker.setProgress(new Progress(i, howMany));
                 }
@@ -440,7 +479,7 @@ public class CreateDemoData {
             // more of them and it will fail
             if ((i % yieldToBgWorkModulo) == 0) {
                 MiscUtils.waitForBackgroundWorkCompletion(
-                        MAX_BG_WORKERS_BEFORE_SLEEP, 5000,
+                        MAX_BG_WORKERS_BEFORE_SLEEP, 0,
                         CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO);
             }
 
@@ -451,6 +490,34 @@ public class CreateDemoData {
                 } catch (InterruptedException e) {
                     // ignore
                 }
+            }
+
+            switch (status) {
+            case PAUSED:
+                doLogAndWorkerStatus("Creation paused, waiting for new status");
+                do {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                } while (status == RUNNING_STATUS.PAUSED);
+
+                if (status == RUNNING_STATUS.STOPPED) {
+                    doLogAndWorkerStatus("Creation stopped");
+                    i = howMany + 1;
+                } else if (status == RUNNING_STATUS.RUNNING) {
+                    doLogAndWorkerStatus("Creation resumed");
+                } else {
+                    throw new RuntimeException(
+                            "The status should be 'paused', 'stopped' or 'running'");
+                }
+                break;
+
+            case STOPPED:
+                doLogAndWorkerStatus("Creation stopped");
+                i = howMany + 1;
+                break;
             }
         }
 
