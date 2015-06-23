@@ -48,24 +48,28 @@ public class CreateDemoDataWorkHanlerOp {
 
     @OperationMethod
     public void run() throws IOException, DocumentException, LifeCycleException {
-        
+
         action = action == null ? "" : action.toLowerCase();
-        
-        CreateDataDemoWork work = CreateDataDemoWork.getInstance();
-        if(work == null) {
-            log.warn("The is no " + CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO + " running");
-        } else {
-            
-            if(action.equals("pause")) {
-                work.pause();
-            } else if(action.equals("resume")) {
-                work.resume();
-            } else if(action.equals("stop")) {
-                work.stop();
+
+        synchronized (CreateDataDemoWork.LOCK) {
+            CreateDataDemoWork work = CreateDataDemoWork.getInstance();
+            if (work == null) {
+                log.warn("The is no "
+                        + CreateDataDemoWork.CATEGORY_CREATE_DATA_DEMO
+                        + " running");
             } else {
-                throw new IllegalArgumentException("INvalid action. Should be 'pause', 'resume' or 'stop'");
+
+                if (action.equals("pause")) {
+                    work.pause();
+                } else if (action.equals("resume")) {
+                    work.resume();
+                } else if (action.equals("stop")) {
+                    work.stop();
+                } else {
+                    throw new IllegalArgumentException(
+                            "INvalid action. Should be 'pause', 'resume' or 'stop'");
+                }
             }
-            
         }
 
     }

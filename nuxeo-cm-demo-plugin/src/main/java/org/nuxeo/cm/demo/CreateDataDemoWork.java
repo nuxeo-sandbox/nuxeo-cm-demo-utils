@@ -66,7 +66,7 @@ public class CreateDataDemoWork extends AbstractWork {
     
     private static CreateDataDemoWork instance;
     
-    private static final String LOCK = "CreateDataDemoWork";
+    public static final String LOCK = "CreateDataDemoWork";
     
     public static CreateDataDemoWork getInstance() {
         return instance;
@@ -129,7 +129,7 @@ public class CreateDataDemoWork extends AbstractWork {
         started = false;
         
         isRunning = false;
-
+        instance = null;
     }
 
     @Override
