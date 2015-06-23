@@ -537,6 +537,9 @@ public class CreateDemoData {
                 doLogAndWorkerStatus("Creation stopped");
                 i = howMany + 1;
                 break;
+                
+            default:
+                break;
             }
         }
 

@@ -38,6 +38,7 @@ public class CreateDataDemoWork extends AbstractWork {
 
     private static final Log log = LogFactory.getLog(CreateDataDemoWork.class);
 
+    // WARNING: Must be the same as the one used in cm.demo.works.xml
     public static final String CATEGORY_CREATE_DATA_DEMO = "CreateCMDataDemo";
 
     protected final DocumentModel parentDoc;
