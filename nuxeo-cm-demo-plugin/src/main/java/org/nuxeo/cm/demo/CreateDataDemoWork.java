@@ -129,6 +129,7 @@ public class CreateDataDemoWork extends AbstractWork {
         started = false;
         
         isRunning = false;
+        createDemoData.setWorker(null);
         instance = null;
     }
 

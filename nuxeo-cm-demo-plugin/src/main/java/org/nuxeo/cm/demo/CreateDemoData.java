@@ -223,6 +223,25 @@ public class CreateDemoData {
             worker.setStatus(inWhat);
         }
     }
+    
+    protected void setWorkerProgress(int inCurrent) {
+        
+        if(worker == null) {
+            return;
+        }
+        
+        Progress p;
+        
+        if(inCurrent < 1) {
+            p = Progress.PROGRESS_0_PC;
+        } else if(inCurrent >= howMany) {
+            p = Progress.PROGRESS_100_PC;
+        } else {
+            p = new Progress ((float) ((float) inCurrent / (float) howMany));
+        }
+        
+        worker.setProgress(p);
+    }
 
     public void run() throws IOException, DocumentException, LifeCycleException {
 
@@ -240,6 +259,7 @@ public class CreateDemoData {
 
         doLogAndWorkerStatus("Creation of " + howMany
                 + " 'InsuranceClaim': start");
+        setWorkerProgress(0);
 
         startTime = System.currentTimeMillis();
         deletePreviousIfNeeded();
@@ -261,6 +281,7 @@ public class CreateDemoData {
         if (worker != null) {
             worker.setStatus(logStr);
         }
+        setWorkerProgress(countCreated);
 
         logStr += "\n    Duration: "
                 + MiscUtils.millisecondsToToTimeFormat(deletionDuration
@@ -469,9 +490,7 @@ public class CreateDemoData {
                             + MiscUtils.millisecondsToToTimeFormat(theDuration);
                 }
                 doLogAndWorkerStatus(logInfo);
-                if (worker != null) {
-                    worker.setProgress(new Progress(i, howMany));
-                }
+                setWorkerProgress(countCreated);
             }
 
             // Also, when creating a lot of Claims, we want to let background
