@@ -930,5 +930,9 @@ public class CreateDemoData {
         sleepDurationAfterCommit = inValue < 1 ? DEFAULT_SLEEP_DURATION_AFTER_COMMIT
                 : inValue;
     }
+    
+    public int getCountOfCreated() {
+        return countCreated;
+    }
 
 }

@@ -41,7 +41,7 @@ public class CreateDataDemoWork extends AbstractWork {
     public static final String CATEGORY_CREATE_DATA_DEMO = "CreateCMDataDemo";
 
     protected final DocumentModel parentDoc;
-    
+
     protected boolean deletePreviousClaims = CreateDemoData.DEFAULT_DELETE_PREVIOUS_CLAIMS;
 
     protected int howMany = CreateDemoData.DEFAULT_HOW_MANY;
@@ -59,32 +59,31 @@ public class CreateDataDemoWork extends AbstractWork {
     protected int sleepDurationMs = CreateDemoData.DEFAULT_SLEEP_DURATION_MS;
 
     protected boolean started = false;
-    
+
     protected boolean isRunning = false;
-    
+
     protected CreateDemoData createDemoData;
-    
+
     private static CreateDataDemoWork instance;
-    
+
     public static final String LOCK = "CreateDataDemoWork";
-    
+
     public static CreateDataDemoWork getInstance() {
         return instance;
     }
-    
+
     public static CreateDataDemoWork getInstance(DocumentModel inParent) {
-        
-        if(instance == null) {
-            synchronized(LOCK) {
-                if(instance == null) {
+
+        if (instance == null) {
+            synchronized (LOCK) {
+                if (instance == null) {
                     instance = new CreateDataDemoWork(inParent);
                 }
             }
         }
-        
+
         return instance;
     }
-    
 
     private CreateDataDemoWork(DocumentModel inParent) {
         super();
@@ -98,12 +97,12 @@ public class CreateDataDemoWork extends AbstractWork {
 
     @Override
     public void work() {
-        
+
         isRunning = true;
 
         boolean withError = false;
         setStatus("Creating data demo");
-        
+
         CoreSession session = initSession();
 
         createDemoData = new CreateDemoData(session, parentDoc, howMany);
@@ -111,7 +110,7 @@ public class CreateDataDemoWork extends AbstractWork {
         createDemoData.setCommitModulo(commitModulo);
         createDemoData.setLogModulo(logModulo);
         createDemoData.setYieldToBgWorkModulo(yieldToBgWorkModulo);
-        
+
         createDemoData.setWorker(this);
         try {
             started = true;
@@ -127,7 +126,7 @@ public class CreateDataDemoWork extends AbstractWork {
         }
         setStatus(status);
         started = false;
-        
+
         isRunning = false;
         createDemoData.setWorker(null);
         instance = null;
@@ -137,7 +136,7 @@ public class CreateDataDemoWork extends AbstractWork {
     public String getCategory() {
         return CATEGORY_CREATE_DATA_DEMO;
     }
-    
+
     public void setDeletePreviousClaims(boolean inValue) {
 
         if (started) {
@@ -145,6 +144,10 @@ public class CreateDataDemoWork extends AbstractWork {
         } else {
             deletePreviousClaims = inValue;
         }
+    }
+    
+    public int getHowMany() {
+        return howMany;
     }
 
     public void setHowMany(int inValue) {
@@ -191,31 +194,63 @@ public class CreateDataDemoWork extends AbstractWork {
     public void setSleepDurationMs(int inValue) {
         sleepDurationMs = inValue;
     }
-    
+
     public void pause() {
-        if(createDemoData != null) {
+        if (createDemoData != null) {
             createDemoData.pause();
         }
     }
-    
+
     public void resume() {
-        if(createDemoData != null) {
+        if (createDemoData != null) {
             createDemoData.resume();
         }
     }
-    
+
     public void stop() {
-        if(createDemoData != null) {
+        if (createDemoData != null) {
             createDemoData.stop();
         }
     }
+
+    public String getRunningStatus() {
+        if (createDemoData != null) {
+            return createDemoData.getStatus().toString();
+        }
+
+        return CreateDemoData.RUNNING_STATUS.UNKNOWN.toString();
+    }
+
+    /**
+     * 
+     * @return a value between 0 and 100
+     *
+     * @since 7.2
+     */
+    public int getProgressAsPercent() {
+
+        int result = 0;
+        Progress p = getProgress();
+
+        if (p != null) {
+            if (p.getIsWithPercent()) {
+                result = (int) p.getPercent();
+            } else {
+                if(p.getTotal() != 0) {
+                    result = (int) (p.getCurrent() / p.getTotal());
+                }
+            }
+        }
+
+        return result;
+    }
     
-    public CreateDemoData.RUNNING_STATUS getRunningStatus() {
+    public int getCountOfCreated() {
         if(createDemoData != null) {
-            return createDemoData.getStatus();
+            return createDemoData.getCountOfCreated();
         }
         
-        return CreateDemoData.RUNNING_STATUS.UNKNOWN;
+        return -1;
     }
 
 }
