@@ -129,7 +129,7 @@ public class UpdateDemoData {
         return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
     }
 
-    private void _saveDocument(DocumentModel inDoc) throws ClientException {
+    private void _saveDocument(DocumentModel inDoc) {
         _session.saveDocument(inDoc);
 
         if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
@@ -199,7 +199,7 @@ public class UpdateDemoData {
     // of the dashes-free version, YYYYMMDD), so we must handle that (and remove
     // dashes)
     // Does not save the document, just update the fields
-    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException, ClientException {
+    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException {
         String title = (String) inDoc.getPropertyValue("dc:title");
         if (title.charAt(4) == '-') {
             title = dateStr.replaceAll("-", "") + title.substring(7);
@@ -485,7 +485,7 @@ public class UpdateDemoData {
     /*
      * Centralize the way we find the nice claim
      */
-    protected DocumentModelList _niceClaimQuery() throws ClientException {
+    protected DocumentModelList _niceClaimQuery() {
         String nxql;
 
         nxql = "SELECT * FROM InsuranceClaim";
@@ -496,7 +496,7 @@ public class UpdateDemoData {
         return _session.query(nxql);
     }
 
-    protected void _niceClaimDelete() throws ClientException {
+    protected void _niceClaimDelete() {
         DocumentModelList allDocs = _niceClaimQuery();
 
         int count = allDocs.size();
