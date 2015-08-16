@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.datademo.UpdateAllDates;
 import org.nuxeo.datademo.tools.DocumentsCallback;
 import org.nuxeo.datademo.tools.DocumentsWalker;
+import org.nuxeo.datademo.tools.ListenersDisabler;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
@@ -61,21 +62,32 @@ public class UpdateAllDatesOp {
 
     @OperationMethod
     public void run() {
-        
+
         log.warn("WARNING: Still under dev/test/not sure we'll ever be using it.");
-        
+
         UpdateAllDates uad = new UpdateAllDates(session, (int) numberOfDays);
-        
-        if(StringUtils.isNotBlank(listenersToDisable)) {
-            String[] names = listenersToDisable.trim().split(",");
-            for(String oneName : names) {
+
+        String[] listenersNames = null;
+        if (StringUtils.isNotBlank(listenersToDisable)) {
+            listenersNames = listenersToDisable.trim().split(",");
+            for (String oneName : listenersNames) {
                 uad.addListenerToDisable(oneName);
             }
         }
-        
+
         uad.run();
 
         log.warn("Update Claim IDs and titles...");
+
+        ListenersDisabler ld = null;
+        if (listenersNames != null && listenersNames.length > 0) {
+            ld = new ListenersDisabler();
+            for (String oneName : listenersNames) {
+                ld.addListener(oneName);
+            }
+            ld.disableListeners();
+        }
+
         // Update all title/claim IDs (based on date)
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
@@ -88,11 +100,13 @@ public class UpdateAllDatesOp {
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
 
+        if (ld != null) {
+            ld.restoreListeners();
+        }
         log.warn("Update Claim IDs and titles done.");
 
-
         log.warn("");
-        log.warn("Here, should we re-index?");
+        log.warn("Here, depending on disabled listeners, you should reindex");
         log.warn("");
 
     }
@@ -152,16 +166,15 @@ public class UpdateAllDatesOp {
     protected void doUpdateDoc(DocumentModel inDoc) {
 
         Calendar created = (Calendar) inDoc.getPropertyValue("dc:created");
-        
+
         String createdStr = _yyyyMMdd.format(created.getTime());
         String title = (String) inDoc.getPropertyValue("dc:title");
-        
+
         title = createdStr + title.substring(8);
         inDoc.setPropertyValue("dc:title", title);
         inDoc.setPropertyValue("incl:incident_id", title);
-        
-        inDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
-                true);
+
+        inDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
         session.saveDocument(inDoc);
 
     }
