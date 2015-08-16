@@ -838,7 +838,9 @@ public class CreateDemoData {
         // Disable DublinCore
         inClaim.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER,
                 true);
-        // Make sure events are not triggered in the CM-SHOWCASE project
+        // Disable all the OparationListeners (event handlers registered from Studio)
+        
+        // This one, looks like it does not really work. But disbling the "OperationMake sure events are not triggered in the CM-SHOWCASE project
         inClaim.putContextData("UpdatingData_NoEventPlease",
                 "whatever-just-not-null");
     }

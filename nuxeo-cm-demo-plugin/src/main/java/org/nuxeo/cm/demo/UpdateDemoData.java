@@ -66,6 +66,12 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
  *        the path cannot be changed, but it is ok. ============================================================ IT DOES
  *        NOT HANDLE: ============================================================ Dates of workflows (due dates of
  *        tasks for example)
+ *        
+ * 
+ * ================= WARNING WARNING WARNING WARNING WARNING =================
+ * About changing the lifecycle state, we are using code that bypasses a lot of
+ * controls (so we avoid event sent, etc.).
+ * ============================================================================
  */
 public class UpdateDemoData {
 
@@ -468,6 +474,11 @@ public class UpdateDemoData {
     }
     
     protected void updateLifecycleState(DocumentModel inDoc) {
+        
+        // ACTUALLY, NO. We consider that CreateDemoData has done the job already
+        if(inDoc == null || inDoc != null) { // Wich means "always"
+            return;
+        }
         
         String current = inDoc.getCurrentLifeCycleState();
         // We keep 5% of "Received"?
