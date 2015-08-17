@@ -69,9 +69,10 @@ public class UpdateAllDatesOp {
 
         String[] listenersNames = null;
         if (StringUtils.isNotBlank(listenersToDisable)) {
-            listenersNames = listenersToDisable.trim().split(",");
+            listenersToDisable.replaceAll(" ", "");
+            listenersNames = listenersToDisable.split(",");
             for (String oneName : listenersNames) {
-                uad.addListenerToDisable(oneName);
+                uad.addListenerToDisable(oneName.trim());
             }
         }
 
