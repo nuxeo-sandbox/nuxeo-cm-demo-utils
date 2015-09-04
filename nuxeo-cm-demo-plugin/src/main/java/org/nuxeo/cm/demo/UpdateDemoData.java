@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.datademo.RandomFirstLastNames;
@@ -34,6 +35,9 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.model.PropertyException;
+import org.nuxeo.ecm.core.schema.DocumentType;
+import org.nuxeo.ecm.core.schema.SchemaManager;
+import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
@@ -111,6 +115,17 @@ public class UpdateDemoData {
 
     static private final int kCITIES_MAX = kCITIES.length - 1;
 
+    // Based on "AccidentTypologie" vocabulary
+    static private final String[] ACC_TYPOLOGY = { "City/Parking", "City/Parking", "City/Parking", "City/Parking",
+            "City/Parking", "City/Crossroads", "City/Crossroads", "City/Crossroads", "City/Avenue",
+
+            "Country/Tunnel", "Country/Tunnel", "Country/Tunnel", "Country/Traffic Circle",
+
+            "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Gas Station",
+            "Highway/Gas Station" };
+
+    static private final int ACC_TYPOLOGY_MAX = ACC_TYPOLOGY.length - 1;
+
     // WARNING: UPDATE THIS citiesAndStates IF YOU CHANGE kCITIES
     static private HashMap<String, String> citiesAndStates;
 
@@ -123,6 +138,9 @@ public class UpdateDemoData {
     protected int _saveCounter = 0;
 
     RandomFirstLastNames randomPeopleNames;
+
+    // SHould be temporary, the time for everybody to upgrade to latest Studio project
+    boolean hasAccidentTypology = false;
 
     public UpdateDemoData(CoreSession inSession) throws IOException {
         _session = inSession;
@@ -176,6 +194,11 @@ public class UpdateDemoData {
         citiesAndStates.put("Orlando", "FL");
 
         randomPeopleNames = RandomFirstLastNames.getInstance();
+
+        SchemaManager sm = Framework.getLocalService(SchemaManager.class);
+        Schema schema = sm.getSchema("InsuranceClaim");
+        hasAccidentTypology = schema.getField("typology") != null;
+        log.warn("Has incl:typology field: " + hasAccidentTypology);
 
     }
 
@@ -405,6 +428,13 @@ public class UpdateDemoData {
             String city = kCITIES[_randomInt(0, kCITIES_MAX)];
             oneDoc.setPropertyValue("incl:incident_city", city);
             oneDoc.setPropertyValue("incl:incident_us_state", citiesAndStates.get(city));
+
+            if (hasAccidentTypology) {
+                String kind = (String) oneDoc.getPropertyValue("incl:incident_kind");
+                if (kind != null && kind.equals("accident")) {
+                    oneDoc.setPropertyValue("incl:typology", ACC_TYPOLOGY[_randomInt(0, ACC_TYPOLOGY_MAX)]);
+                }
+            }
 
             // Now update some info of the children, if any
             DocumentModelList children = _session.getChildren(oneDoc.getRef());

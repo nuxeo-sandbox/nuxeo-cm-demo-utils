@@ -152,6 +152,17 @@ public class CreateDemoData {
 
     protected static final int WHY_REJECTED_MAX = WHY_REJECTED.length - 1;
 
+    // Based on "AccidentTypologie" vocabulary
+    static private final String[] ACC_TYPOLOGY = { "City/Parking", "City/Parking", "City/Parking", "City/Parking",
+            "City/Parking", "City/Crossroads", "City/Crossroads", "City/Crossroads", "City/Avenue",
+
+            "Country/Tunnel", "Country/Tunnel", "Country/Tunnel", "Country/Traffic Circle",
+
+            "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Gas Station",
+            "Highway/Gas Station" };
+
+    static private final int ACC_TYPOLOGY_MAX = ACC_TYPOLOGY.length - 1;
+
     protected boolean deletePreviousClaims = DEFAULT_DELETE_PREVIOUS_CLAIMS;
 
     protected CoreSession session;
@@ -620,6 +631,10 @@ public class CreateDemoData {
                 + LOCATION_STREETS[ToolsMisc.randomInt(0, LOCATION_STREETS_MAX)];
         claim.setPropertyValue("incl:incident_location", someStr);
         setCityStateLatAndLong(claim);
+        
+        if (kind != null && kind.equals("accident")) {
+            claim.setPropertyValue("incl:typology", ACC_TYPOLOGY[ToolsMisc.randomInt(0, ACC_TYPOLOGY_MAX)]);
+        }
 
         claim.setPropertyValue("incl:due_date",
                 RandomDates.buildDate(claimCreation, 15, 40, false));
