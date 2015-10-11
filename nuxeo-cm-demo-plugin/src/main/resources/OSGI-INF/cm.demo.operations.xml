@@ -1,0 +1,13 @@
+<component name="org.nuxeo.cm.demo.operations">
+
+  <extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"
+    point="operations" >
+      <operation class="org.nuxeo.cm.demo.CreateDemoDataOp" />
+      <operation class="org.nuxeo.cm.demo.CreateDemoDataWorkHanlerOp" />
+      <operation class="org.nuxeo.cm.demo.CreateDemoDataInfoOp" />
+      <operation class="org.nuxeo.cm.demo.UpdateDemoDataOp" />
+      <operation class="org.nuxeo.cm.demo.UpdateAllDatesOp" />
+      <operation class="org.nuxeo.cm.demo.WeatherHistory" />
+   </extension>
+    
+</component>

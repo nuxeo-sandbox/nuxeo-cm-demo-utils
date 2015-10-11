@@ -6,21 +6,22 @@ A plug-in for the Case Management demo (cm.cloud.nuxeo.com)
 ## List of Features (details below)
 * [WeatherHistory](#weatherhistory), an example of calling an external WebService
 * [JavaScript Dashboard](#javascript-dashboard), for quick stats on cases
-* [Update Demo Data](#update-demo-data), for quick stats on cases
+* [Update Demo Data](#update-demo-data), updates claim data to make it more recent
 
 ## Build
 
 _Note_: You can also get the .zip of the market place package in the "Releases" part of this project (on GitHub)
 
-_Other Note_: This project expects specific schemas to be implemented in your solution and depends on the Studsio project deployed on cm.cloud.nuxeo.com => If you plan to use it (and not just look at the code) then make sure your own projects have the same schemas and fields (`InsuranceClaim` schema with expected lifecycle states, ...)
+_Other Note_: This project expects specific schemas to be implemented in your solution and depends on the Studio project deployed on cm.cloud.nuxeo.com => If you plan to use it (and not just look at the code) then make sure your own projects have the same schemas and fields (`InsuranceClaim` schema with expected lifecycle states, ...)
 
 Assuming maven is correctly setup on your computer:
 
-    ```
+First build the [nuxeo-datademo](https://github.com/nuxeo-sandbox/nuxeo-datademo) plug-in.
+
     cd /path/to/nuxeo-cm-demo-utils
     mvn package
-    # The plug-in is in /target, named nuxeo-cm-demo-utils-{version}.jar
-    ```
+
+The plug-in will be placed at is in `nuxeo-cm-demo-mp/target/`, named nuxeo-cm-demo-utils-{version}.zip
 
 ## WeatherHistory
 This operation receives the name of a city and a date, and fills a specific

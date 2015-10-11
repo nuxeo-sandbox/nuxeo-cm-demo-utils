@@ -16,6 +16,7 @@
  */
 package org.nuxeo.cm.demo;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,16 +26,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.datademo.RandomFirstLastNames;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.model.PropertyException;
+import org.nuxeo.ecm.core.schema.DocumentType;
+import org.nuxeo.ecm.core.schema.SchemaManager;
+import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
  * @author Thibaud Arguillere
@@ -62,7 +69,9 @@ import org.nuxeo.runtime.api.Framework;
  *        claim is archived Set to 0-5 days ago dc:title Updated to reflect the changes in the creation date WARNING:
  *        the path cannot be changed, but it is ok. ============================================================ IT DOES
  *        NOT HANDLE: ============================================================ Dates of workflows (due dates of
- *        tasks for example)
+ *        tasks for example) ================= WARNING WARNING WARNING WARNING WARNING ================= About changing
+ *        the lifecycle state, we are using code that bypasses a lot of controls (so we avoid event sent, etc.).
+ *        ============================================================================
  */
 public class UpdateDemoData {
 
@@ -90,7 +99,8 @@ public class UpdateDemoData {
     static protected final int kLFS_ARCHIVED = 7;
 
     // This list should be loaded dynamically
-    static protected final String[] kUSERS = { "john", "john", "john", "john", "kate", "kate", "kate", "alan", "julie", "julie", "mike" };
+    static protected final String[] kUSERS = { "john", "john", "john", "john", "kate", "kate", "kate", "alan", "julie",
+            "julie", "mike" };
 
     static protected final int kMAX_FOR_USERS_RANDOM = kUSERS.length - 1;
 
@@ -99,11 +109,23 @@ public class UpdateDemoData {
     static private final String kNICE_CLAIM_FIELD = "dc:format";
 
     static private final String kNICE_CLAIM_FIELD_VALUE = "Nice claim for template rendering";
-    
-    static private final String[] kCITIES = {"New York", "New York", "New York", "Los Angeles", "Los Angeles", "Atlanta", "Seattle", "Boston", "Orlando"};
-    
+
+    static private final String[] kCITIES = { "New York", "New York", "New York", "Los Angeles", "Los Angeles",
+            "Atlanta", "Seattle", "Boston", "Orlando" };
+
     static private final int kCITIES_MAX = kCITIES.length - 1;
-    
+
+    // Based on "AccidentTypologie" vocabulary
+    static private final String[] ACC_TYPOLOGY = { "City/Parking", "City/Parking", "City/Parking", "City/Parking",
+            "City/Parking", "City/Crossroads", "City/Crossroads", "City/Crossroads", "City/Avenue",
+
+            "Country/Tunnel", "Country/Tunnel", "Country/Tunnel", "Country/Traffic Circle",
+
+            "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Ramp Access", "Highway/Gas Station",
+            "Highway/Gas Station" };
+
+    static private final int ACC_TYPOLOGY_MAX = ACC_TYPOLOGY.length - 1;
+
     // WARNING: UPDATE THIS citiesAndStates IF YOU CHANGE kCITIES
     static private HashMap<String, String> citiesAndStates;
 
@@ -115,13 +137,25 @@ public class UpdateDemoData {
 
     protected int _saveCounter = 0;
 
-    public UpdateDemoData(CoreSession inSession) {
+    RandomFirstLastNames randomPeopleNames;
+
+    // SHould be temporary, the time for everybody to upgrade to latest Studio project
+    boolean hasAccidentTypology = false;
+
+    public UpdateDemoData(CoreSession inSession) throws IOException {
         _session = inSession;
         _setup();
     }
 
     public void run() throws Exception {
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         _UpdateData();
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
     }
 
     private int _randomInt(int inMin, int inMax) {
@@ -135,11 +169,12 @@ public class UpdateDemoData {
         if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
             _doLog("Commiting the last " + kSAVE_SESSION_MODULO
                     + " InsuranceClaim (and their children.) Total InsuranceClaim handled: " + _saveCounter);
-            _session.save();
+            TransactionHelper.commitOrRollbackTransaction();
+            TransactionHelper.startTransaction();
         }
     }
 
-    protected void _setup() {
+    protected void _setup() throws IOException {
         _kSTATES = new HashMap<String, Integer>();
         _kSTATES.put("received", kLFS_RECEIVED);
         _kSTATES.put("checkcontract", kLFS_CHECK_CONTRACT);
@@ -151,12 +186,20 @@ public class UpdateDemoData {
         _kSTATES.put("archived", kLFS_ARCHIVED);
 
         citiesAndStates = new HashMap<String, String>();
-        citiesAndStates.put("New York",  "NY");
+        citiesAndStates.put("New York", "NY");
         citiesAndStates.put("Los Angeles", "CA");
-        citiesAndStates.put("Atlanta",  "GA");
-        citiesAndStates.put("Seattle",  "WA");
-        citiesAndStates.put("Boston",  "MA");
-        citiesAndStates.put("Orlando",  "FL");
+        citiesAndStates.put("Atlanta", "GA");
+        citiesAndStates.put("Seattle", "WA");
+        citiesAndStates.put("Boston", "MA");
+        citiesAndStates.put("Orlando", "FL");
+
+        randomPeopleNames = RandomFirstLastNames.getInstance();
+
+        SchemaManager sm = Framework.getLocalService(SchemaManager.class);
+        Schema schema = sm.getSchema("InsuranceClaim");
+        hasAccidentTypology = schema.getField("typology") != null;
+        log.warn("Has incl:typology field: " + hasAccidentTypology);
+
     }
 
     protected int _lifecycleStateStrToInt(String inLCS) {
@@ -276,46 +319,46 @@ public class UpdateDemoData {
         for (DocumentModel oneDoc : allDocs) {
             Calendar aDate, startDate, creationDate, modifDate;
             String creator;
-            
+
             updateLifecycleState(oneDoc);
-            
+
             int lfs = _lifecycleStateStrToInt(oneDoc.getCurrentLifeCycleState().toLowerCase());
             String creationDateStr;
 
             // Half in previous month
             creationDate = (Calendar) _today.clone();
-            switch(lfs) {
+            switch (lfs) {
             case kLFS_ARCHIVED:
                 creationDate.add(Calendar.DATE, _randomInt(30, 90) * -1);
                 break;
-                
+
             case kLFS_RECEIVED:
                 creationDate.add(Calendar.DATE, _randomInt(2, 20) * -1);
                 break;
-                
+
             case kLFS_CHECK_CONTRACT:
                 creationDate.add(Calendar.DATE, _randomInt(5, 30) * -1);
                 break;
-                
+
             case kLFS_OPENED:
                 creationDate.add(Calendar.DATE, _randomInt(20, 40) * -1);
                 break;
-                
+
             case kLFS_COMPLETED:
                 creationDate.add(Calendar.DATE, _randomInt(20, 40) * -1);
                 break;
-                
+
             case kLFS_EVALUATED:
                 creationDate.add(Calendar.DATE, _randomInt(50, 80) * -1);
                 break;
-                
+
             case kLFS_DECISION_MADE:
                 creationDate.add(Calendar.DATE, _randomInt(30, 90) * -1);
                 break;
-                
-                default:
-                    creationDate.add(Calendar.DATE, _randomInt(31, 90) * -1);
-                    break;
+
+            default:
+                creationDate.add(Calendar.DATE, _randomInt(31, 90) * -1);
+                break;
             }
 
             creationDateStr = _yyyyMMdd.format(creationDate.getTime());
@@ -372,24 +415,26 @@ public class UpdateDemoData {
             // it may happen the creation date becomes > modification
             modifDate = _buildDate(_today, _randomInt(0, 90) * -1);
             /*
-            if (lfs == kLFS_ARCHIVED) {
-                aDate = _buildDate(_today, _randomInt(5, 90) * -1);
-                oneDoc.setPropertyValue("incl:date_closed", aDate);
-                modifDate = (Calendar) aDate.clone();
-            } else {
-                // Let say it was modified recently...
-                modifDate = _buildDate(_today, _randomInt(0, 10) * -1);
-            }
-            */
+             * if (lfs == kLFS_ARCHIVED) { aDate = _buildDate(_today, _randomInt(5, 90) * -1);
+             * oneDoc.setPropertyValue("incl:date_closed", aDate); modifDate = (Calendar) aDate.clone(); } else { // Let
+             * say it was modified recently... modifDate = _buildDate(_today, _randomInt(0, 10) * -1); }
+             */
             _updateModificationInfo(oneDoc, kUSERS[_randomInt(0, kMAX_FOR_USERS_RANDOM)], modifDate);
 
             // Update first/last names
-            oneDoc.setPropertyValue("pein:first_name", RandomFirstLastName.getFirstName(RandomFirstLastName.GENDER.ANY));
-            oneDoc.setPropertyValue("pein:last_name", RandomFirstLastName.getLastName());
-            
-            String city = kCITIES[ _randomInt(0, kCITIES_MAX)];
+            oneDoc.setPropertyValue("pein:first_name", randomPeopleNames.getAFirstName(RandomFirstLastNames.GENDER.ANY));
+            oneDoc.setPropertyValue("pein:last_name", randomPeopleNames.getALastName());
+
+            String city = kCITIES[_randomInt(0, kCITIES_MAX)];
             oneDoc.setPropertyValue("incl:incident_city", city);
             oneDoc.setPropertyValue("incl:incident_us_state", citiesAndStates.get(city));
+
+            if (hasAccidentTypology) {
+                String kind = (String) oneDoc.getPropertyValue("incl:incident_kind");
+                if (kind != null && kind.equals("accident")) {
+                    oneDoc.setPropertyValue("incl:typology", ACC_TYPOLOGY[_randomInt(0, ACC_TYPOLOGY_MAX)]);
+                }
+            }
 
             // Now update some info of the children, if any
             DocumentModelList children = _session.getChildren(oneDoc.getRef());
@@ -450,36 +495,42 @@ public class UpdateDemoData {
         _session.save();
         _doLog("End of update demo data");
     }
-    
+
     protected void updateLifecycleState(DocumentModel inDoc) {
-        
+
+        // ACTUALLY, NO. We consider that CreateDemoData has done the job already
+        if (System.currentTimeMillis() != 0) { // Wich means "always" (want to keep the code below without comments or
+                                               // having to go in git history)
+            return;
+        }
+
         String current = inDoc.getCurrentLifeCycleState();
         // We keep 5% of "Received"?
-        if(current.equals("Received") && _randomInt(1, 20) > 1) {
+        if (current.equals("Received") && _randomInt(1, 20) > 1) {
             inDoc.putContextData(DublinCoreListener.DISABLE_DUBLINCORE_LISTENER, true);
             inDoc.putContextData("UpdatingData_NoEventPlease", true);
             inDoc.followTransition("to_CheckContract");
-            
+
             int r = _randomInt(1, 100);
             // 57% of Archived +> we are at 62%
-            if(r > 43) {
+            if (r > 43) {
                 inDoc.followTransition("to_Opened");
                 inDoc.followTransition("to_Completed");
                 inDoc.followTransition("to_Evaluated");
                 inDoc.followTransition("to_DecisionMade");
                 inDoc.followTransition("to_Archived");
-            } else if(r > 7){ //7% stay in CheckContract => we are at 69%
+            } else if (r > 7) { // 7% stay in CheckContract => we are at 69%
                 inDoc.followTransition("to_Opened");
-                if(r > 12) {
+                if (r > 12) {
                     inDoc.followTransition("to_Completed");
                 }
-                if(r > 35) {
+                if (r > 35) {
                     inDoc.followTransition("to_Evaluated");
                 }
                 // We ignore DesisionMade
             }
         }
-        
+
     }
 
     /*
@@ -520,7 +571,7 @@ public class UpdateDemoData {
      */
     protected void _niceClaimCreate() throws Exception {
         Calendar aDate, creationDate;
-        String user;
+        String user, title;
         int count;
         DocumentModel niceClaim = null;
 
@@ -547,9 +598,13 @@ public class UpdateDemoData {
         // (setting some values, required by the chains ran by these handlers)
         // We also handle a unique path for this nice claim
         UIDSequencer svc = Framework.getService(UIDSequencer.class);
+        title = _yyyyMMdd.format(creationDate.getTime()) + "-ACC-" + Integer.toString(svc.getNext("ACC"));
         niceClaim = _session.createDocumentModel(kNICE_CLAIM_PARENT_PATH,
                 "claim-" + _yyyyMMdd.format(creationDate.getTime()) + "-" + Integer.toString(svc.getNext("NiceClaim")),
                 "InsuranceClaim");
+
+        niceClaim.setPropertyValue("dc:title", title);
+        niceClaim.setPropertyValue("incl:incident_id", title);
         niceClaim.setPropertyValue("incl:incident_kind", "accident");
         niceClaim.setPropertyValue("incl:contract_id", "045-781-245");
         niceClaim.setPropertyValue("incl:incident_date", creationDate);

@@ -3,11 +3,15 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-addons-parent</artifactId>
-    <version>7.1</version>
+    <version>7.3</version>
   </parent>
   <groupId>org.nuxeo.cm.demo</groupId>
   <artifactId>nuxeo-cm-demo-parent</artifactId>
+<<<<<<< HEAD
   <version>1.3-SNAPSHOT</version>
+=======
+  <version>2.2-SNAPSHOT</version>
+>>>>>>> origin/create-data-demo
   <name>Parent project for the Case Management Demo Plug-in</name>
   <packaging>pom</packaging>
   <description></description>
@@ -16,7 +20,11 @@
     <module>nuxeo-cm-demo-mp</module>
   </modules>
   <properties>
+<<<<<<< HEAD
     <nuxeo.cm.demo.version>1.3-SNAPSHOT</nuxeo.cm.demo.version>
+=======
+    <nuxeo.cm.demo.version>2.2-SNAPSHOT</nuxeo.cm.demo.version>
+>>>>>>> origin/create-data-demo
   </properties>
   <dependencyManagement>
     <dependencies>
