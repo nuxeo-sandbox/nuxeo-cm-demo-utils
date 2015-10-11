@@ -38,8 +38,8 @@ import org.nuxeo.ecm.core.api.model.PropertyException;
 import org.nuxeo.ecm.core.schema.DocumentType;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.types.Schema;
+import org.nuxeo.ecm.core.uidgen.UIDSequencer;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
-import org.nuxeo.ecm.platform.uidgen.UIDSequencer;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
@@ -163,7 +163,7 @@ public class UpdateDemoData {
         return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
     }
 
-    private void _saveDocument(DocumentModel inDoc) {
+    private void _saveDocument(DocumentModel inDoc) throws ClientException {
         _session.saveDocument(inDoc);
 
         if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
@@ -242,7 +242,7 @@ public class UpdateDemoData {
     // of the dashes-free version, YYYYMMDD), so we must handle that (and remove
     // dashes)
     // Does not save the document, just update the fields
-    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException {
+    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException, ClientException {
         String title = (String) inDoc.getPropertyValue("dc:title");
         if (title.charAt(4) == '-') {
             title = dateStr.replaceAll("-", "") + title.substring(7);
@@ -536,7 +536,7 @@ public class UpdateDemoData {
     /*
      * Centralize the way we find the nice claim
      */
-    protected DocumentModelList _niceClaimQuery() {
+    protected DocumentModelList _niceClaimQuery() throws ClientException {
         String nxql;
 
         nxql = "SELECT * FROM InsuranceClaim";
@@ -547,7 +547,7 @@ public class UpdateDemoData {
         return _session.query(nxql);
     }
 
-    protected void _niceClaimDelete() {
+    protected void _niceClaimDelete() throws ClientException {
         DocumentModelList allDocs = _niceClaimQuery();
 
         int count = allDocs.size();
