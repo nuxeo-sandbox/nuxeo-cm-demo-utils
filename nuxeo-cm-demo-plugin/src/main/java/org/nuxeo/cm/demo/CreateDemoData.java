@@ -38,10 +38,8 @@ import org.nuxeo.datademo.RandomUSZips.USZip;
 import org.nuxeo.datademo.tools.ToolsMisc;
 import org.nuxeo.datademo.tools.TransactionInLoop;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.uidgen.UIDSequencer;
 import org.nuxeo.ecm.core.work.AbstractWork;
 import org.nuxeo.ecm.core.work.api.Work.Progress;
@@ -254,7 +252,7 @@ public class CreateDemoData {
         worker.setProgress(p);
     }
 
-    public void run() throws IOException, DocumentException, LifeCycleException {
+    public void run() throws IOException {
 
         long startTime, endTime, deletionDuration, creationDuration;
 
@@ -456,7 +454,7 @@ public class CreateDemoData {
 
     }
 
-    protected void createData() throws DocumentException, LifeCycleException {
+    protected void createData() {
 
         TransactionInLoop til = new TransactionInLoop(session);
         til.commitAndStartNewTransaction();
@@ -771,8 +769,7 @@ public class CreateDemoData {
     }
 
     protected DocumentModel updateLifecycleStateAndRelatedData(
-            DocumentModel oneClaim) throws DocumentException,
-            LifeCycleException {
+            DocumentModel oneClaim) {
 
         int r = ToolsMisc.randomInt(1, 100);
         String newState = "Opened";

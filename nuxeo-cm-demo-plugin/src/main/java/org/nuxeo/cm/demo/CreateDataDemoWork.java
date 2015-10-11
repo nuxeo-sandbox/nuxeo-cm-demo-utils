@@ -21,9 +21,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.AbstractWork;
 
 /**
@@ -116,7 +114,7 @@ public class CreateDataDemoWork extends AbstractWork {
         try {
             started = true;
             createDemoData.run();
-        } catch (IOException | DocumentException | LifeCycleException e) {
+        } catch (IOException e) {
             withError = true;
             log.error("Data-demo creation interrupted with an error", e);
         }

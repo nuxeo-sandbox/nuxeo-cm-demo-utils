@@ -25,8 +25,6 @@ import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
-import org.nuxeo.ecm.core.api.DocumentException;
-import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 
 /**
  * 
@@ -42,7 +40,7 @@ public class CreateDemoDataWorkHanlerOp {
     protected String action;
 
     @OperationMethod
-    public void run() throws IOException, DocumentException, LifeCycleException {
+    public void run() throws IOException {
 
         action = action == null ? "" : action.toLowerCase();
 

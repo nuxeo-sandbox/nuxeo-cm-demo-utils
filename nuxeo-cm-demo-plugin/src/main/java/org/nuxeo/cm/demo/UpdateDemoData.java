@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.datademo.RandomFirstLastNames;
@@ -34,8 +33,6 @@ import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.api.model.PropertyException;
-import org.nuxeo.ecm.core.schema.DocumentType;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.core.uidgen.UIDSequencer;
@@ -242,7 +239,7 @@ public class UpdateDemoData {
     // of the dashes-free version, YYYYMMDD), so we must handle that (and remove
     // dashes)
     // Does not save the document, just update the fields
-    private void _updateTitle(DocumentModel inDoc, String dateStr) throws PropertyException, ClientException {
+    private void _updateTitle(DocumentModel inDoc, String dateStr) throws ClientException {
         String title = (String) inDoc.getPropertyValue("dc:title");
         if (title.charAt(4) == '-') {
             title = dateStr.replaceAll("-", "") + title.substring(7);
@@ -254,8 +251,7 @@ public class UpdateDemoData {
     }
 
     // Does not save the document
-    private void _updateModificationInfo(DocumentModel inDoc, String inUser, Calendar inDate) throws PropertyException,
-            ClientException {
+    private void _updateModificationInfo(DocumentModel inDoc, String inUser, Calendar inDate) throws ClientException {
         inDoc.setPropertyValue("dc:lastContributor", inUser);
 
         // Handling the list of contributors: The following is a

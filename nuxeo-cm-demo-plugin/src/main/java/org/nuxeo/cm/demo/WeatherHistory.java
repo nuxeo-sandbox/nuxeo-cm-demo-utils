@@ -34,7 +34,6 @@ import org.nuxeo.ecm.automation.core.collectors.DocumentModelCollector;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.model.PropertyException;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -115,7 +114,7 @@ public class WeatherHistory {
     }
 
     @OperationMethod(collector = DocumentModelCollector.class)
-    public DocumentModel run(DocumentModel input) throws PropertyException, ClientException, IOException {
+    public DocumentModel run(DocumentModel input) throws ClientException, IOException {
         String weather = "(unknown)";
 
         _getServicesKeysFromConf();

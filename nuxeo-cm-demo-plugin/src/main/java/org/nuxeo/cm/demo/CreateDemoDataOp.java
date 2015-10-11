@@ -26,9 +26,7 @@ import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
-import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
 import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.core.work.api.WorkManager.Scheduling;
 import org.nuxeo.runtime.api.Framework;
@@ -71,7 +69,7 @@ public class CreateDemoDataOp {
     protected long sleepDurationMs = 0;
 
     @OperationMethod
-    public void run() throws IOException, DocumentException, LifeCycleException {
+    public void run() throws IOException {
         
         boolean deletePrevious;
         if(StringUtils.isBlank(deletePreviousClaimsStr)) {
