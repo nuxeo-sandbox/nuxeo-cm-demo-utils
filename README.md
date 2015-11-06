@@ -8,6 +8,8 @@ A plug-in for the Case Management demo (cm.cloud.nuxeo.com)
 * [JavaScript Dashboard](#javascript-dashboard), for quick stats on cases
 * [Update Demo Data](#update-demo-data), updates claim data to make it more recent
 
+This plug-in also depends on nuxeo-demodata. The dependency is handled in the .pom file (and also in the Marketplace Package)
+
 ## Build
 
 _Note_: You can also get the .zip of the market place package in the "Releases" part of this project (on GitHub)
