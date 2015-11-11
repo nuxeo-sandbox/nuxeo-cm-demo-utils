@@ -31,10 +31,10 @@ import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.test.AutomationFeature;
 //import org.nuxeo.ecm.automation.test.EmbeddedAutomationServerFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentException;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.lifecycle.LifeCycleException;
+import org.nuxeo.ecm.core.api.DocumentNotFoundException;
+import org.nuxeo.ecm.core.api.LifeCycleException;
 import org.nuxeo.ecm.core.test.TransactionalFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
@@ -154,7 +154,7 @@ public class CreateDataDemoTest {
 
     @Ignore
     @Test
-    public void testCreateAFewClaims() throws IOException, DocumentException,
+    public void testCreateAFewClaims() throws IOException, DocumentNotFoundException,
             LifeCycleException {
 
         String mn = getCurrentMethodName(new RuntimeException());

@@ -31,9 +31,9 @@ import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
 import org.nuxeo.ecm.automation.core.collectors.DocumentModelCollector;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -114,13 +114,13 @@ public class WeatherHistory {
     }
 
     @OperationMethod(collector = DocumentModelCollector.class)
-    public DocumentModel run(DocumentModel input) throws ClientException, IOException {
+    public DocumentModel run(DocumentModel input) throws NuxeoException, IOException {
         String weather = "(unknown)";
 
         _getServicesKeysFromConf();
 
         if (!_devKeysOK) {
-            throw new ClientException(
+            throw new NuxeoException(
                     "forecast.io key and/or bing key are missing or invalid. Are they correctly set-up in nuxeo.conf?");
         }
 

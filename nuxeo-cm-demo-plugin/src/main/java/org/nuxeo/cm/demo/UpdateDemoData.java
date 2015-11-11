@@ -29,10 +29,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.datademo.RandomFirstLastNames;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.core.uidgen.UIDSequencer;
@@ -160,7 +160,7 @@ public class UpdateDemoData {
         return inMin + (int) (Math.random() * ((inMax - inMin) + 1));
     }
 
-    private void _saveDocument(DocumentModel inDoc) throws ClientException {
+    private void _saveDocument(DocumentModel inDoc) throws NuxeoException {
         _session.saveDocument(inDoc);
 
         if ((++_saveCounter % kSAVE_SESSION_MODULO) == 0) {
@@ -239,7 +239,7 @@ public class UpdateDemoData {
     // of the dashes-free version, YYYYMMDD), so we must handle that (and remove
     // dashes)
     // Does not save the document, just update the fields
-    private void _updateTitle(DocumentModel inDoc, String dateStr) throws ClientException {
+    private void _updateTitle(DocumentModel inDoc, String dateStr) throws NuxeoException {
         String title = (String) inDoc.getPropertyValue("dc:title");
         if (title.charAt(4) == '-') {
             title = dateStr.replaceAll("-", "") + title.substring(7);
@@ -251,7 +251,7 @@ public class UpdateDemoData {
     }
 
     // Does not save the document
-    private void _updateModificationInfo(DocumentModel inDoc, String inUser, Calendar inDate) throws ClientException {
+    private void _updateModificationInfo(DocumentModel inDoc, String inUser, Calendar inDate) throws NuxeoException {
         inDoc.setPropertyValue("dc:lastContributor", inUser);
 
         // Handling the list of contributors: The following is a
@@ -532,7 +532,7 @@ public class UpdateDemoData {
     /*
      * Centralize the way we find the nice claim
      */
-    protected DocumentModelList _niceClaimQuery() throws ClientException {
+    protected DocumentModelList _niceClaimQuery() throws NuxeoException {
         String nxql;
 
         nxql = "SELECT * FROM InsuranceClaim";
@@ -543,7 +543,7 @@ public class UpdateDemoData {
         return _session.query(nxql);
     }
 
-    protected void _niceClaimDelete() throws ClientException {
+    protected void _niceClaimDelete() throws NuxeoException {
         DocumentModelList allDocs = _niceClaimQuery();
 
         int count = allDocs.size();
