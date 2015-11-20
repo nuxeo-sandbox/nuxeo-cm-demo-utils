@@ -1,5 +1,5 @@
 <package type="addon" name="nuxeo-cm-demo" version="@VERSION@">
-  <title>Nuxeo Tagging Operations</title>
+  <title>Nuxeo Case Management Demo Utilities</title>
   <description>
     <p>This addon activates Nuxeo CM Demo Utils.</p>
   </description>
@@ -17,7 +17,7 @@
     <platform>cap-7.4</platform>
     <platform>cap-7.10</platform>
   </platforms>
-<!-- 
+  <!-- 
   <dependencies>
     <package>nuxeo-adullact-service:@VERSION@</package>
   </dependencies>
