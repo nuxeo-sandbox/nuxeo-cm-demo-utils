@@ -187,7 +187,7 @@ function _do_drawTheDashboard(inData, inStatusText, inXHR) {
 	_drawDashboardMainTitle(gDashboardMainObj);
 
 	// If no claim is found, drawing is quite easy ;->
-	stats.countClaims = inData.entries.size();
+	stats.countClaims = inData.entries.length;
 	if(stats.countClaims === 0) {
 		gDashboardMainObj.append("<div class='cmdqs_fonts no_claims'>(No Claims)</div>");
 		return;
