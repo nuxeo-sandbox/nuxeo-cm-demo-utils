@@ -1,34 +1,27 @@
-<f:subview xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:c="http://java.sun.com/jstl/core"
-	xmlns:nxthemes="http://nuxeo.org/nxthemes"
-	xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
-	xmlns:nxd="http://nuxeo.org/nxweb/document"
-	xmlns:nxl="http://nuxeo.org/nxforms/layout"
-	xmlns:nxu="http://nuxeo.org/nxweb/util">
+<f:subview xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html" xmlns:c="http://java.sun.com/jstl/core" xmlns:nxthemes="http://nuxeo.org/nxthemes" xmlns:a4j="https://ajax4jsf.dev.java.net/ajax" xmlns:nxd="http://nuxeo.org/nxweb/document" xmlns:nxl="http://nuxeo.org/nxforms/layout" xmlns:nxu="http://nuxeo.org/nxweb/util">
 
-	<c:if test="false">
-		<!-- test-js-widget.xhtml -->
-		<!-- doSomething() is in test-js-widget.js -->
-    Do not put comment directely in xhtml or you are gonna have trouble.
-    Use c:if test="false" to add comment in xhtml code.
+  <c:if test="false">
+    <!-- test-js-widget.xhtml -->
+    <!-- doSomething() is in test-js-widget.js -->
+    Do not put comment directely in xhtml or you are gonna have trouble. Use c:if test="false" to add comment in xhtml code.
   </c:if>
 
-	<script type="text/javascript" charset="utf-8">
-	console.warn('FOR PROD. VERSION, REMOVE THE INCLUSION OF cm-demo-quickstats-widget.js');
-</script>
-	<script src="#{contextPath}/scripts/cm-demo-quickstats-widget.js" />
-	<LINK href="#{contextPath}/css/cm-demo-quickstats-widget.css"
-		rel="stylesheet" type="text/css" />
+  <script type="text/javascript" charset="utf-8">
+    console.warn('FOR PROD. VERSION, REMOVE THE INCLUSION OF cm-demo-quickstats-widget.js');
 
-	<div id="cm_demo_quickstats" class="cmdqs_main_class">Loading
-		tasks...</div>
+  </script>
 
-	<script type="text/javascript" charset="utf-8">
-jQuery(document).ready(function() {
-	drawDashboard("#{currentDocument.id}", "#{currentDocument.incl.incident_kind}", "#{currentDocument.queue.lifecycle_state}", "cm_demo_quickstats");
-});
-</script>
+  <script src="#{contextPath}/scripts/cm-demo-quickstats-widget.js" />
+
+  <LINK href="#{contextPath}/css/cm-demo-quickstats-widget.css" rel="stylesheet" type="text/css" />
+
+  <div id="cm_demo_quickstats" class="cmdqs_main_class">Loading tasks...</div>
+
+  <script type="text/javascript" charset="utf-8">
+    jQuery(document).ready(function() {
+      drawDashboard("#{currentDocument.id}", "#{currentDocument.incl.incident_kind}", "#{currentDocument.queue.lifecycle_state}", "cm_demo_quickstats");
+    });
+
+  </script>
 
 </f:subview>
