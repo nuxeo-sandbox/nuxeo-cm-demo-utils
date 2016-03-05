@@ -22,3 +22,5 @@ target
 *.gpd.*
 *cpJar*
 dependency-tree.log
+bower_components
+node_modules
