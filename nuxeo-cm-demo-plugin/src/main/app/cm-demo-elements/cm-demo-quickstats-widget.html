@@ -56,12 +56,6 @@ Custom property | Description | Default
         }
       }
 
-      .verticalCenterAnything {
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
       .claim-total {
         text-align: center;
       }
@@ -103,6 +97,10 @@ Custom property | Description | Default
 
     </style>
 
+    <nuxeo-connection></nuxeo-connection>
+
+    <nuxeo-page-provider auto provider="IC-FacetedSearchMain" query="[[_query(claimState)]]" page-size="1" current-page="{{claims}}" enrichers="preview, documentURL, driveEditURL"></nuxeo-page-provider>
+
     <paper-card heading="Claims Progress" class="justified">
       <div class="card-content">
         <div class="claim-state">
@@ -136,9 +134,25 @@ Custom property | Description | Default
     Polymer({
       is: 'cm-demo-quickstats-widget',
 
-      observers: [
-        '_htmlChanged(htmlToInject)'
-      ],
+      properties: {
+        claimState: {
+          type: String
+        }
+      },
+
+      _query: function(claimState) {
+        var query = this._genericFilter("InsuranceClaim");
+
+        return query;
+      },
+
+      _genericFilter: function(type) {
+        var query = "SELECT * FROM " + type +
+          " WHERE ecm:currentLifeCycleState != 'deleted' " +
+          " AND ecm:isCheckedInVersion = 0 " +
+          " AND ecm:mixinType != 'HiddenInNavigation' ";
+        return query;
+      },
 
       _debug: function(data) {
         debugger;
