@@ -1,0 +1,22 @@
+<component name="org.nuxeo.cm.demo.page-providers">
+
+  <!-- Page provider to get claims that are in progress, aggregating those on schedule or past due. -->
+  <extension point="providers" target="org.nuxeo.ecm.platform.query.api.PageProviderService">
+    <genericPageProvider name="claims-in-progress" class="org.nuxeo.elasticsearch.provider.ElasticSearchNxqlPageProvider">
+      <property name="coreSession">#{documentManager}</property>
+      <pageSize>1</pageSize>
+      <fixedPart>SELECT * FROM InsuranceClaim WHERE ecm:mixinType != 'HiddenInNavigation' AND ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted' AND cq:incident_kind = ?</fixedPart>
+      <aggregates>
+        <aggregate id="InsuranceClaim_due_date_agg" type="date_range" parameter="incl:due_date">
+          <field schema="IC-CaseStatus_cv" name="InsuranceClaim_due_date_agg" />
+          <properties/>
+          <dateRanges>
+            <dateRange key="from_now_to_" fromDate="now" />
+            <dateRange key="from__to_now" toDate="now" />
+          </dateRanges>
+        </aggregate>
+      </aggregates>
+    </genericPageProvider>
+  </extension>
+
+</component>
