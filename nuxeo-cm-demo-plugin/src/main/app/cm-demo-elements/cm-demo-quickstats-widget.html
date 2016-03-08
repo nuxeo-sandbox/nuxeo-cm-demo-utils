@@ -52,7 +52,7 @@ Custom property | Description | Default
         @apply(--cm-demo-quickstats-widget);
       }
 
-      paper-card {
+      paper-card.quick-stats {
         --paper-card-header-color: #ffffff;
         --paper-card-header: {
           background: #236ba5;
@@ -119,7 +119,7 @@ Custom property | Description | Default
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-card heading="Claims Progress" class="justified">
+    <paper-card heading="Claims Progress" class="quick-stats">
 
       <div class="card-content">
         <div class="claim-progress-row">
