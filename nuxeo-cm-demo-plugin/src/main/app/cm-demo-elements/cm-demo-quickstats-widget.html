@@ -123,27 +123,29 @@ Custom property | Description | Default
 
     <nuxeo-connection></nuxeo-connection>
     <!-- Get claims on schedule claims. -->
-    <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{countClaimsOnSchedule}}"></nuxeo-page-provider>
-    <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{countClaimsPastDue}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
 
     <!-- Get completed claims. -->
-    <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{claimsDone}}"></nuxeo-page-provider>
+    <template is="dom-if" if="[[!claimState]]">
+      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{claimsDone}}"></nuxeo-page-provider>
+    </template>
 
     <paper-card heading="Claims Progress" class="justified">
 
       <div class="card-content">
         <div class="claim-state">
-          <div>On Schedule <span class="countSingle">[[countClaimsOnSchedule]] Claims</span></div>
+          <div>On Schedule <span class="countSingle">[[_countClaimsOnSchedule]] Claims</span></div>
           <div class="progress-bar">
-            <paper-progress value="[[percentClaimsOnSchedule]]" class="progress-on-schedule single"></paper-progress>
-            <div class="count ">[[percentClaimsOnSchedule]]%</div>
+            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single"></paper-progress>
+            <div class="count ">[[_percentClaimsOnSchedule]]%</div>
           </div>
         </div>
         <div class="claim-state">
-          <div>Past Due <span class="countSingle">[[countClaimsPastDue]] Claims</span></div>
+          <div>Past Due <span class="countSingle">[[_countClaimsPastDue]] Claims</span></div>
           <div class="progress-bar">
-            <paper-progress value="[[percentClaimsPastDue]]" class="progress-past-due single"></paper-progress>
-            <div class="count ">[[percentClaimsPastDue]]%</div>
+            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single"></paper-progress>
+            <div class="count ">[[_percentClaimsPastDue]]%</div>
           </div>
         </div>
 
@@ -159,8 +161,8 @@ Custom property | Description | Default
 
         <div>Total Claims: [[_totalInProgressClaims]]</div>
         <div class="histogram">
-          <paper-progress value="100" class="progress-on-schedule bar-hidden" style="width: [[_convertPercentToProgressWidth(percentClaimsOnSchedule)]];"></paper-progress>
-          <paper-progress value="100" class="progress-past-due bar-hidden" style="width: [[_convertPercentToProgressWidth(percentClaimsPastDue)]];"></paper-progress>
+          <paper-progress value="100" class="progress-on-schedule bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
+          <paper-progress value="100" class="progress-past-due bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
           <template is="dom-if" if="[[!claimState]]">
             <paper-progress value="100" class="progress-done bar-done"></paper-progress>
           </template>
@@ -191,17 +193,17 @@ Custom property | Description | Default
         _queryDoneClaims: {
           type: String
         },
-        percentClaimsOnSchedule: {
+        _percentClaimsOnSchedule: {
           type: Number,
-          computed: '_computePercent(countClaimsOnSchedule,_totalInProgressClaims)'
+          computed: '_computePercent(_countClaimsOnSchedule,_totalInProgressClaims)'
         },
-        percentClaimsPastDue: {
+        _percentClaimsPastDue: {
           type: Number,
-          computed: '_computePercent(countClaimsPastDue,_totalInProgressClaims)'
+          computed: '_computePercent(_countClaimsPastDue,_totalInProgressClaims)'
         },
         _totalInProgressClaims: {
           type: Number,
-          computed: '_computeTotalInProgressClaims(countClaimsOnSchedule, countClaimsPastDue)'
+          computed: '_computeTotalInProgressClaims(_countClaimsOnSchedule, _countClaimsPastDue)'
         }
       },
 
@@ -210,8 +212,7 @@ Custom property | Description | Default
         '_set_queryOnScheduleClaims(claimState)',
         '_set_queryPastDueClaims(claimKind)',
         '_set_queryPastDueClaims(claimState)',
-        '_set_queryDoneClaims(claimKind)',
-        '_set_queryDoneClaims(claimState)'
+        '_set_queryDoneClaims(claimKind)'
       ],
 
       _queryGenericFilter: function() {
@@ -262,15 +263,15 @@ Custom property | Description | Default
         this._queryDoneClaims = this._queryGenericFilter() + " AND ecm:currentLifeCycleState = 'DecisionMade'"
       },
 
-      _computeTotalInProgressClaims: function(countClaimsOnSchedule, countClaimsPastDue) {
-        return countClaimsOnSchedule + countClaimsPastDue;
+      _computeTotalInProgressClaims: function(_countClaimsOnSchedule, _countClaimsPastDue) {
+        return _countClaimsOnSchedule + _countClaimsPastDue;
       },
 
       _computePercent: function(numerator, denominator) {
         return Math.round((numerator / denominator * 100));
       },
 
-      _convertPercentToProgressWidth: function(percentage){
+      _convertPercentToProgressWidth: function(percentage) {
         return percentage * 2;
       },
 
