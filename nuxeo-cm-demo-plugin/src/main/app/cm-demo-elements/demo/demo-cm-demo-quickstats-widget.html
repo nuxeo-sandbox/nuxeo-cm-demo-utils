@@ -38,6 +38,11 @@ Contributors:
       padding: 10px;
     }
 
+    td {
+      vertical-align: top;
+      text-align: center;
+    }
+
   </style>
 
 </head>
@@ -45,25 +50,27 @@ Contributors:
 <body unresolved class="fullbleed">
 
   <template is="dom-bind">
+
     <nuxeo-connection url="http://cm.cloud.nuxeo.com/nuxeo" username="Administrator" password="Nuxeo2015"></nuxeo-connection>
 
-    <paper-card heading="Accident CheckContract">
-      <div class="card-content">
-        <cm-demo-quickstats-widget claim-kind="accident" claim-state="CheckContract"></cm-demo-quickstats-widget>
-      </div>
-    </paper-card>
-
-    <paper-card heading="Accident <blank>">
-      <div class="card-content">
-        <cm-demo-quickstats-widget claim-kind="accident" claim-state=""></cm-demo-quickstats-widget>
-      </div>
-    </paper-card>
-
-    <paper-card heading="Accident">
-      <div class="card-content">
-        <cm-demo-quickstats-widget claim-kind="accident"></cm-demo-quickstats-widget>
-      </div>
-    </paper-card>
+    <table>
+      <tr>
+        <td>Accident w/ CheckContract</td>
+        <td>Accident w/ blank</td>
+        <td>Accident</td>
+      </tr>
+      <tr>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-kind="accident" claim-state="CheckContract"></cm-demo-quickstats-widget>
+        </td>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-kind="accident" claim-state=""></cm-demo-quickstats-widget>
+        </td>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-kind="accident"></cm-demo-quickstats-widget>
+        </td>
+      </tr>
+    </table>
 
   </template>
 
