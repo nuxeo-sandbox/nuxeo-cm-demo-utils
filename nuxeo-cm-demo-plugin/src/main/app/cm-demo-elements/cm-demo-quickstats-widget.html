@@ -76,7 +76,7 @@ Custom property | Description | Default
         vertical-align: middle;
       }
 
-      paper-progress.single {
+      paper-progress.single-stat {
         --paper-progress-height: 20px;
         display: table-cell;
         vertical-align: middle;
@@ -94,23 +94,15 @@ Custom property | Description | Default
         --paper-progress-active-color: #00bcad;
       }
 
-      .bar-hidden {
+      .progress-hidden {
         width: 0;
       }
 
-      .bar-past-due {
-        width: 0;
-      }
-
-      .bar-done {
-        width: 0;
-      }
-
-      .histogram {
+      .progress-histogram {
         display: inline-flex;
       }
 
-      .countSingle {
+      .count-single-stat {
         color: #545454;
         font-size: x-small;
       }
@@ -124,43 +116,43 @@ Custom property | Description | Default
 
     <!-- Get completed claims. -->
     <template is="dom-if" if="[[_includeDoneClaims]]">
-      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{claimsDone}}"></nuxeo-page-provider>
+      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
     <paper-card heading="Claims Progress" class="justified">
 
       <div class="card-content">
         <div class="claim-progress-row">
-          <div>On Schedule <span class="countSingle">[[_countClaimsOnSchedule]] Claims</span></div>
+          <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
           <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single"></paper-progress>
-            <div class="progress-percent-label ">[[_percentClaimsOnSchedule]]%</div>
+            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single-stat"></paper-progress>
+            <div class="progress-percent-label">[[_percentClaimsOnSchedule]]%</div>
           </div>
         </div>
         <div class="claim-progress-row">
-          <div>Past Due <span class="countSingle">[[_countClaimsPastDue]] Claims</span></div>
+          <div>Past Due <span class="count-single-stat">[[_countClaimsPastDue]] Claims</span></div>
           <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single"></paper-progress>
-            <div class="progress-percent-label ">[[_percentClaimsPastDue]]%</div>
+            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single-stat"></paper-progress>
+            <div class="progress-percent-label">[[_percentClaimsPastDue]]%</div>
           </div>
         </div>
 
         <template is="dom-if" if="[[_includeDoneClaims]]">
           <div class="claim-progress-row">
-            <div>Done <span class="countSingle">[[claimsDone]] Claims</span></div>
+            <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
             <div class="progress-bar-container">
-              <paper-progress value="[[claimsDone]]" class="progress-done single"></paper-progress>
-              <div class="progress-percent-label ">[[_percentClaimsDone]]%</div>
+              <paper-progress value="[[_countClaimsDone]]" class="progress-done single-stat"></paper-progress>
+              <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
             </div>
           </div>
         </template>
 
         <div>Total Claims: [[_totalInProgressClaims]]</div>
-        <div class="histogram">
-          <paper-progress value="100" class="progress-on-schedule bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
-          <paper-progress value="100" class="progress-past-due bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
+        <div class="progress-histogram">
+          <paper-progress value="100" class="progress-on-schedule progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
+          <paper-progress value="100" class="progress-past-due progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
           <template is="dom-if" if="[[_includeDoneClaims]]">
-            <paper-progress value="100" class="progress-done bar-done"></paper-progress>
+            <paper-progress value="100" class="progress-done progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsDone)]];"></paper-progress>
           </template>
         </div>
       </div>
@@ -196,6 +188,10 @@ Custom property | Description | Default
         _percentClaimsPastDue: {
           type: Number,
           computed: '_computePercent(_countClaimsPastDue,_totalInProgressClaims)'
+        },
+        _percentClaimsDone: {
+          type: Number,
+          computed: '_computePercent(_countClaimsDone)'
         },
         _totalInProgressClaims: {
           type: Number,
