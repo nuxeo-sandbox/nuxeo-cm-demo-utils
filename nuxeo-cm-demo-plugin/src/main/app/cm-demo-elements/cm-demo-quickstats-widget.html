@@ -212,6 +212,7 @@ Custom property | Description | Default
         '_setIncludeDoneClaims(claimState)'
       ],
 
+      // Generic query constraints used for all queries.
       _queryGenericFilter: function() {
         var genericFilter = "";
         genericFilter = genericFilter + "SELECT * FROM Document";
@@ -230,6 +231,7 @@ Custom property | Description | Default
         return todayFilter;
       },
 
+      // Filter for claims that are "in progress"; i.e. not "done".
       _queryInProgressFilter: function(operator) {
         var inProgressFilter = this._queryGenericFilter();
 
@@ -248,14 +250,17 @@ Custom property | Description | Default
         return inProgressFilter;
       },
 
+      // Set the filter for claims that are "on schedule".
       _set_queryOnScheduleClaims: function() {
         this._queryOnScheduleClaims = this._queryInProgressFilter(">=");
       },
 
+      // Set the filter for claims that are "past due".
       _set_queryPastDueClaims: function() {
         this._queryPastDueClaims = this._queryInProgressFilter("<");
       },
 
+      // Set the query for claims that are "done".
       _set_queryDoneClaims: function() {
         this._queryDoneClaims = this._queryGenericFilter() + " AND ecm:currentLifeCycleState = 'DecisionMade'"
       },
