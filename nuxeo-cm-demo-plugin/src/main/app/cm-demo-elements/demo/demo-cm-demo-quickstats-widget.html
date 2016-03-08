@@ -40,7 +40,6 @@ Contributors:
 
     td {
       vertical-align: top;
-      text-align: center;
     }
 
   </style>
@@ -68,6 +67,25 @@ Contributors:
         </td>
         <td heading="">
           <cm-demo-quickstats-widget claim-kind="accident"></cm-demo-quickstats-widget>
+        </td>
+      </tr>
+    </table>
+
+        <table>
+      <tr>
+        <td>Breakdown w/ CheckContract</td>
+        <td>blank w/ CheckContract</td>
+        <td>CheckContract</td>
+      </tr>
+      <tr>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-kind="breakdown" claim-state="CheckContract"></cm-demo-quickstats-widget>
+        </td>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-kind="" claim-state="CheckContract"></cm-demo-quickstats-widget>
+        </td>
+        <td heading="">
+          <cm-demo-quickstats-widget claim-state="CheckContract"></cm-demo-quickstats-widget>
         </td>
       </tr>
     </table>
