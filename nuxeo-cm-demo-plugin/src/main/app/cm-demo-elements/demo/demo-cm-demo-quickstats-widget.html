@@ -47,14 +47,23 @@ Contributors:
   <template is="dom-bind">
     <nuxeo-connection url="http://cm.cloud.nuxeo.com/nuxeo" username="Administrator" password="Nuxeo2015"></nuxeo-connection>
 
-    Accident CheckContract
-    <cm-demo-quickstats-widget claim-kind="accident" claim-state="CheckContract"></cm-demo-quickstats-widget>
+    <paper-card heading="Accident CheckContract">
+      <div class="card-content">
+        <cm-demo-quickstats-widget claim-kind="accident" claim-state="CheckContract"></cm-demo-quickstats-widget>
+      </div>
+    </paper-card>
 
-    Accident blank
-    <cm-demo-quickstats-widget claim-kind="accident" claim-state=""></cm-demo-quickstats-widget>
+    <paper-card heading="Accident <blank>">
+      <div class="card-content">
+        <cm-demo-quickstats-widget claim-kind="accident" claim-state=""></cm-demo-quickstats-widget>
+      </div>
+    </paper-card>
 
-    Accident
-    <cm-demo-quickstats-widget claim-kind="accident"></cm-demo-quickstats-widget>
+    <paper-card heading="Accident">
+      <div class="card-content">
+        <cm-demo-quickstats-widget claim-kind="accident"></cm-demo-quickstats-widget>
+      </div>
+    </paper-card>
 
   </template>
 
