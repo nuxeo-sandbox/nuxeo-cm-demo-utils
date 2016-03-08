@@ -59,21 +59,17 @@ Custom property | Description | Default
         }
       }
 
-      .claim-total {
-        text-align: center;
-      }
-
-      .claim-state {
+      .claim-progress-row {
         margin-bottom: 10px;
         display: flex;
         flex-direction: column;
       }
 
-      .progress-bar {
+      .progress-bar-container {
         display: table;
       }
 
-      .count {
+      .progress-percent-label {
         padding-left: 5px;
         font-size: smaller;
         display: table-cell;
@@ -127,34 +123,34 @@ Custom property | Description | Default
     <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
 
     <!-- Get completed claims. -->
-    <template is="dom-if" if="[[!claimState]]">
+    <template is="dom-if" if="[[_includeDoneClaims]]">
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{claimsDone}}"></nuxeo-page-provider>
     </template>
 
     <paper-card heading="Claims Progress" class="justified">
 
       <div class="card-content">
-        <div class="claim-state">
+        <div class="claim-progress-row">
           <div>On Schedule <span class="countSingle">[[_countClaimsOnSchedule]] Claims</span></div>
-          <div class="progress-bar">
+          <div class="progress-bar-container">
             <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single"></paper-progress>
-            <div class="count ">[[_percentClaimsOnSchedule]]%</div>
+            <div class="progress-percent-label ">[[_percentClaimsOnSchedule]]%</div>
           </div>
         </div>
-        <div class="claim-state">
+        <div class="claim-progress-row">
           <div>Past Due <span class="countSingle">[[_countClaimsPastDue]] Claims</span></div>
-          <div class="progress-bar">
+          <div class="progress-bar-container">
             <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single"></paper-progress>
-            <div class="count ">[[_percentClaimsPastDue]]%</div>
+            <div class="progress-percent-label ">[[_percentClaimsPastDue]]%</div>
           </div>
         </div>
 
-        <template is="dom-if" if="[[!claimState]]">
-          <div class="claim-state">
+        <template is="dom-if" if="[[_includeDoneClaims]]">
+          <div class="claim-progress-row">
             <div>Done <span class="countSingle">[[claimsDone]] Claims</span></div>
-            <div class="progress-bar">
+            <div class="progress-bar-container">
               <paper-progress value="[[claimsDone]]" class="progress-done single"></paper-progress>
-              <div class="count ">50%</div>
+              <div class="progress-percent-label ">[[_percentClaimsDone]]%</div>
             </div>
           </div>
         </template>
@@ -163,7 +159,7 @@ Custom property | Description | Default
         <div class="histogram">
           <paper-progress value="100" class="progress-on-schedule bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
           <paper-progress value="100" class="progress-past-due bar-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
-          <template is="dom-if" if="[[!claimState]]">
+          <template is="dom-if" if="[[_includeDoneClaims]]">
             <paper-progress value="100" class="progress-done bar-done"></paper-progress>
           </template>
         </div>
@@ -204,6 +200,10 @@ Custom property | Description | Default
         _totalInProgressClaims: {
           type: Number,
           computed: '_computeTotalInProgressClaims(_countClaimsOnSchedule, _countClaimsPastDue)'
+        },
+        _includeDoneClaims: {
+          type: Boolean,
+          value: true
         }
       },
 
@@ -212,7 +212,8 @@ Custom property | Description | Default
         '_set_queryOnScheduleClaims(claimState)',
         '_set_queryPastDueClaims(claimKind)',
         '_set_queryPastDueClaims(claimState)',
-        '_set_queryDoneClaims(claimKind)'
+        '_set_queryDoneClaims(claimKind)',
+        '_setIncludeDoneClaims(claimState)'
       ],
 
       _queryGenericFilter: function() {
@@ -275,8 +276,17 @@ Custom property | Description | Default
         return percentage * 2;
       },
 
+      _setIncludeDoneClaims: function() {
+        if (this.claimState) {
+          this._includeDoneClaims = false;
+        } else {
+          this._includeDoneClaims = true;
+        }
+      },
+
       _debug: function(data) {
         debugger;
+        return true;
       }
     });
 
