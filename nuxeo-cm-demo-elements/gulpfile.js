@@ -46,8 +46,8 @@ var AUTOPREFIXER_BROWSERS = [
   'bb >= 10'
 ];
 
-var APP = 'app';
-var DIST = 'dist';
+var APP = 'src/main/app';
+var DIST = 'target/classes/nuxeo.war/cm-demo-elements';
 
 var pathIfPresent = function(root, subpath) {
   return !subpath ? root : path.join(root, subpath);
@@ -95,9 +95,7 @@ var optimizeHtmlTask = function(src, dest) {
     .pipe($.if('*.html', $.replace('elements/elements.html', 'elements/elements.vulcanized.html')))
     .pipe(assets)
     // Concatenate and minify JavaScript
-    .pipe($.if('*.js', $.uglify({preserveComments: 'some'}).on('error', function(e){
-            console.log(e);
-         })))
+    .pipe($.if('*.js', $.uglify({preserveComments: 'some'})))
     // Concatenate and minify styles
     // In case you are still using useref build blocks
     .pipe($.if('*.css', $.minifyCss()))
@@ -157,7 +155,7 @@ gulp.task('copy', function() {
   }).pipe(gulp.dest(dist()));
 
   var bower = gulp.src([
-    appl('bower_components/**/*')
+    'bower_components/**/*'
   ]).pipe(gulp.dest(dist('bower_components')));
 
   var elements = gulp.src([appl('elements/**/*.html'),
@@ -247,7 +245,7 @@ gulp.task('cache-config', function(callback) {
 
 // Clean output directory
 gulp.task('clean', function() {
-  return del(['.tmp', dist()],{force: true});
+  return del(['.tmp', dist()]);
 });
 
 // Watch files for changes & reload
