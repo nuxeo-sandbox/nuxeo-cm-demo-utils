@@ -3,25 +3,16 @@
   <c:if test="false">
     <!-- test-js-widget.xhtml -->
     <!-- doSomething() is in test-js-widget.js -->
-    Do not put comment directely in xhtml or you are gonna have trouble. Use c:if test="false" to add comment in xhtml code.
+    Do not put comments directely in the xhtml or you are gonna have trouble. Use c:if test="false" to add comment in xhtml code.
   </c:if>
 
-  <script type="text/javascript" charset="utf-8">
-    console.warn('FOR PROD. VERSION, REMOVE THE INCLUSION OF cm-demo-quickstats-widget.js');
+  <script src="#{baseURL}bower_components/webcomponentsjs/webcomponents-lite.js"></script>
 
-  </script>
+  <link rel="import" href="#{baseURL}cm-demo-elements/elements/elements.vulcanized.html">
 
-  <script src="#{contextPath}/scripts/cm-demo-quickstats-widget.js" />
-
-  <LINK href="#{contextPath}/css/cm-demo-quickstats-widget.css" rel="stylesheet" type="text/css" />
-
-  <div id="cm_demo_quickstats" class="cmdqs_main_class">Loading tasks...</div>
-
-  <script type="text/javascript" charset="utf-8">
-    jQuery(document).ready(function() {
-      drawDashboard("#{currentDocument.id}", "#{currentDocument.incl.incident_kind}", "#{currentDocument.queue.lifecycle_state}", "cm_demo_quickstats");
-    });
-
-  </script>
+  <template is="dom-bind">
+    <nuxeo-connection url="/nuxeo"></nuxeo-connection>
+    <cm-demo-quickstats-widget claim-kind="#{currentDocument.incl.incident_kind}" claim-state="#{currentDocument.queue.lifecycle_state}"></cm-demo-quickstats-widget>
+  </template>
 
 </f:subview>
