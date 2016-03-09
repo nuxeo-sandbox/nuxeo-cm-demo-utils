@@ -8,6 +8,7 @@
   </parent>
 
   <artifactId>nuxeo-cm-demo-elements</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <name>Case Management Demo Elements</name>
   <description>Polymer components for the Nuxeo Case Management demo.</description>
 
