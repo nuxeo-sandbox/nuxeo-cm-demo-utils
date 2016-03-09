@@ -46,7 +46,7 @@ var AUTOPREFIXER_BROWSERS = [
   'bb >= 10'
 ];
 
-var APP = '.';
+var APP = 'src/main/app';
 var DIST = 'target/classes/nuxeo.war/cm-demo-elements';
 
 var pathIfPresent = function(root, subpath) {
