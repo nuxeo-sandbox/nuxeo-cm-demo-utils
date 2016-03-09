@@ -1,10 +1,10 @@
 {
-  "name": "cm-demo-elements",
+  "name": "cm-demo-app",
   "version": "0.0.1",
   "authors": [
     "Josh Fletcher <jfletcher@nuxeo.com>"
   ],
-  "description": "A set of elements for the Case Management Demo",
+  "description": "Polymer app for building CM Demo elements.",
   "keywords": [
     "web-component",
     "polymer",
@@ -18,5 +18,6 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.1.4",
+    "nuxeo-elements": "nuxeo/nuxeo-elements#b14c260342fc44ead950ab5eb934f861f78dad11"
   }
 }

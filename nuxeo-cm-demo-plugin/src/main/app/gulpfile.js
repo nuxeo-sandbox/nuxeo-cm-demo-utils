@@ -47,7 +47,7 @@ var AUTOPREFIXER_BROWSERS = [
 ];
 
 var APP = '.';
-var DIST = '../../../target/classes/nuxeo.war/cm-demo-elements';
+var DIST = 'target/classes/nuxeo.war/cm-demo-elements';
 
 var pathIfPresent = function(root, subpath) {
   return !subpath ? root : path.join(root, subpath);

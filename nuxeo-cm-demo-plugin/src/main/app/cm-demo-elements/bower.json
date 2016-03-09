@@ -1,7 +1,9 @@
 {
   "name": "cm-demo-elements",
   "version": "0.0.1",
-  "authors": [],
+  "authors": [
+    "Josh Fletcher <jfletcher@nuxeo.com>"
+  ],
   "description": "A set of elements for the Case Management Demo",
   "keywords": [
     "web-component",
