@@ -152,7 +152,7 @@ Custom property | Description | Default
         <div>Total Claims: [[_totalClaims]]</div>
         <div class="progress-histogram">
           <paper-progress id="histogramProgressOnSchedule" value="100" class="progress-on-schedule progress-hidden"></paper-progress>
-          <paper-progress id="histogramProgressPastDue"value="100" class="progress-past-due progress-hidden"></paper-progress>
+          <paper-progress id="histogramProgressPastDue" value="100" class="progress-past-due progress-hidden"></paper-progress>
           <template is="dom-if" if="[[_includeDoneClaims]]">
             <paper-progress id="histogramProgressDone" value="100" class="progress-done progress-hidden"></paper-progress>
           </template>
@@ -273,7 +273,7 @@ Custom property | Description | Default
         return (numerator / denominator * 100);
       },
 
-      // paper-progress bars are 200 pixels wide; I double the perfentace to get the width
+      // paper-progress bars are 200 pixels wide; I double the percentage to get the width
       // so that the 3 bars fit in the default space.
       _convertPercentToProgressWidth: function(percentage) {
         return percentage * 2;
@@ -301,6 +301,8 @@ Custom property | Description | Default
         if (this._countClaimsDone) {
           this._percentClaimsDone = fixedPercentages[2];
         }
+
+        this._setHistogramBarWidths();
       },
 
       _setTotalClaims: function() {
@@ -339,6 +341,19 @@ Custom property | Description | Default
         var largestRemainder = document.createElement('nuxeo-util-largest-remainder');
         largestRemainder.valuesToFix = claimPercentages;
         return largestRemainder.computePercentages();
+      },
+
+      // Set the width of the bars in the histogram.
+      _setHistogramBarWidths: function() {
+        if (this._countClaimsOnSchedule) {
+          this.$.histogramProgressOnSchedule.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsOnSchedule) + "px");
+        }
+        if (this._countClaimsPastDue) {
+          this.$.histogramProgressPastDue.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsPastDue) + "px");
+        }
+        if (this._countClaimsDone) {
+          this.$.histogramProgressDone.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsDone) + "px");
+        }
       },
 
       _debug: function(data) {
