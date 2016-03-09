@@ -1,0 +1,352 @@
+<!--
+@license
+(C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and others.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this file except in compliance with the License. You may obtain
+a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Contributors:
+  Joshua Fletcher <jfletcher@nuxeo.com>
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+<link rel="import" href="../nuxeo-elements/nuxeo-connection.html">
+<link rel="import" href="../nuxeo-elements/nuxeo-page-provider.html">
+
+<!--
+An element for displaying the progress of claims in the CM demo.
+
+Example:
+
+    <cm-demo-quickstats-widget claim-kind="accident"
+                               claim-state="CheckContract">
+    </cm-demo-quickstats-widget>
+
+
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--cm-demo-quickstats-widget` | Mixin applied to the element | `{}`
+
+@group Nuxeo CM Demo Elements
+@element cm-demo-quickstats-widget
+@demo demo/demo-cm-demo-quickstats-widget.html
+-->
+<dom-module id="cm-demo-quickstats-widget">
+
+  <template>
+
+    <style>
+      :host {
+        @apply(--cm-demo-quickstats-widget);
+      }
+
+      paper-card.quick-stats {
+        --paper-card-header-color: #ffffff;
+        --paper-card-header: {
+          background: #236ba5;
+        }
+      }
+
+      .claim-progress-row {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .progress-bar-container {
+        display: table;
+      }
+
+      .progress-percent-label {
+        padding-left: 5px;
+        font-size: smaller;
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      paper-progress.single-stat {
+        --paper-progress-height: 20px;
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      .progress-on-schedule {
+        --paper-progress-active-color: #00a300;
+      }
+
+      .progress-past-due {
+        --paper-progress-active-color: #cc0000;
+      }
+
+      .progress-done {
+        --paper-progress-active-color: #00bcad;
+      }
+
+      .progress-hidden {
+        width: 0;
+      }
+
+      .progress-histogram {
+        display: inline-flex;
+      }
+
+      .count-single-stat {
+        color: #545454;
+        font-size: x-small;
+      }
+
+    </style>
+
+    <nuxeo-connection></nuxeo-connection>
+    <!-- Get claims on schedule claims. -->
+    <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
+
+    <!-- Get completed claims. -->
+    <template is="dom-if" if="[[_includeDoneClaims]]">
+      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
+    </template>
+
+    <paper-card heading="Claims Progress" class="quick-stats">
+
+      <div class="card-content">
+        <div class="claim-progress-row">
+          <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
+          <div class="progress-bar-container">
+            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single-stat"></paper-progress>
+            <div class="progress-percent-label">[[_percentClaimsOnSchedule]]%</div>
+          </div>
+        </div>
+        <div class="claim-progress-row">
+          <div>Past Due <span class="count-single-stat">[[_countClaimsPastDue]] Claims</span></div>
+          <div class="progress-bar-container">
+            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single-stat"></paper-progress>
+            <div class="progress-percent-label">[[_percentClaimsPastDue]]%</div>
+          </div>
+        </div>
+
+        <template is="dom-if" if="[[_includeDoneClaims]]">
+          <div class="claim-progress-row">
+            <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
+            <div class="progress-bar-container">
+              <paper-progress value="[[_percentClaimsDone]]" class="progress-done single-stat"></paper-progress>
+              <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
+            </div>
+          </div>
+        </template>
+
+        <div>Total Claims: [[_totalClaims]]</div>
+        <div class="progress-histogram">
+          <paper-progress value="100" class="progress-on-schedule progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
+          <paper-progress value="100" class="progress-past-due progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
+          <template is="dom-if" if="[[_includeDoneClaims]]">
+            <paper-progress value="100" class="progress-done progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsDone)]];"></paper-progress>
+          </template>
+        </div>
+      </div>
+
+    </paper-card>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'cm-demo-quickstats-widget',
+
+      properties: {
+        claimKind: {
+          type: String
+        },
+        claimState: {
+          type: String
+        },
+        _queryOnScheduleClaims: {
+          type: String
+        },
+        _queryPastDueClaims: {
+          type: String
+        },
+        _queryDoneClaims: {
+          type: String
+        },
+        _percentClaimsOnSchedule: {
+          type: Number
+        },
+        _percentClaimsPastDue: {
+          type: Number
+        },
+        _percentClaimsDone: {
+          type: Number
+        },
+        _totalClaims: {
+          type: Number
+        },
+        _includeDoneClaims: {
+          type: Boolean,
+          value: true
+        }
+      },
+
+      observers: [
+        '_set_queryOnScheduleClaims(claimKind)',
+        '_set_queryOnScheduleClaims(claimState)',
+        '_set_queryPastDueClaims(claimKind)',
+        '_set_queryPastDueClaims(claimState)',
+        '_set_queryDoneClaims(claimKind)',
+        '_setIncludeDoneClaims(claimState)',
+        '_setMetrics(_countClaimsOnSchedule,_countClaimsPastDue)',
+        '_setMetrics(_countClaimsDone)',
+      ],
+
+      // Generic query constraints used for all queries.
+      _queryGenericFilter: function() {
+        var genericFilter = "";
+        genericFilter = genericFilter + "SELECT * FROM Document";
+        genericFilter = genericFilter + " WHERE ecm:mixinType != 'HiddenInNavigation'";
+        genericFilter = genericFilter + " AND ecm:isCheckedInVersion = 0";
+        genericFilter = genericFilter + " AND ecm:currentLifeCycleState != 'deleted'";
+        genericFilter = genericFilter + " AND ecm:primaryType = 'InsuranceClaim'";
+        return genericFilter;
+      },
+
+      // Generate today's date in YYYY-MM-DD for NXQL.
+      _queryTodayFilter: function(operator) {
+        var todayDate = new Date();
+        var todayString = todayDate.getFullYear() + "-" + (todayDate.getMonth() + 1) + "-" + todayDate.getDate();
+        var todayFilter = " AND incl:due_date " + operator + " DATE '" + todayString + "'";
+        return todayFilter;
+      },
+
+      // Filter for claims that are "in progress"; i.e. not "done".
+      _queryInProgressFilter: function(operator) {
+        var inProgressFilter = this._queryGenericFilter();
+
+        if (this.claimState) {
+          inProgressFilter = inProgressFilter + " AND ecm:currentLifeCycleState = '" + this.claimState + "'";
+        } else {
+          // If no state is specified, I must filter compeleted claims at least. A completed claim cannot be "in progress".
+          inProgressFilter = inProgressFilter + " AND ecm:currentLifeCycleState NOT IN ('Archived','DecisionMade')";
+        }
+
+        if (this.claimKind) {
+          inProgressFilter = inProgressFilter + " AND incl:incident_kind = '" + this.claimKind + "'";
+        }
+        inProgressFilter = inProgressFilter + this._queryTodayFilter(operator);
+
+        return inProgressFilter;
+      },
+
+      // Set the filter for claims that are "on schedule".
+      _set_queryOnScheduleClaims: function() {
+        this._queryOnScheduleClaims = this._queryInProgressFilter(">=");
+      },
+
+      // Set the filter for claims that are "past due".
+      _set_queryPastDueClaims: function() {
+        this._queryPastDueClaims = this._queryInProgressFilter("<");
+      },
+
+      // Set the query for claims that are "done".
+      _set_queryDoneClaims: function() {
+        this._queryDoneClaims = this._queryGenericFilter() + " AND ecm:currentLifeCycleState = 'DecisionMade'"
+      },
+
+      _computTotal: function(param1, param2) {
+        return param1 + param2;
+      },
+
+      _computePercent: function(numerator, denominator) {
+        return (numerator / denominator * 100);
+      },
+
+      // paper-progress bars are 200 pixels wide; I double the perfentace to get the width
+      // so that the 3 bars fit in the default space.
+      _convertPercentToProgressWidth: function(percentage) {
+        return percentage * 2;
+      },
+
+      _setIncludeDoneClaims: function() {
+        if (this.claimState) {
+          this._includeDoneClaims = false;
+        } else {
+          this._includeDoneClaims = true;
+        }
+      },
+
+      _setMetrics: function() {
+        this._setTotalClaims();
+
+        var fixedPercentages = this._getPercentages();
+
+        if (this._countClaimsOnSchedule) {
+          this._percentClaimsOnSchedule = fixedPercentages[0];
+        }
+        if (this._countClaimsPastDue) {
+          this._percentClaimsPastDue = fixedPercentages[1];
+        }
+        if (this._countClaimsDone) {
+          this._percentClaimsDone = fixedPercentages[2];
+        }
+      },
+
+      _setTotalClaims: function() {
+        var totalClaims = 0;
+
+        if (this._countClaimsOnSchedule) {
+          totalClaims = totalClaims + this._countClaimsOnSchedule;
+        }
+
+        if (this._countClaimsPastDue) {
+          totalClaims = totalClaims + this._countClaimsPastDue;
+        }
+
+        if (this._countClaimsDone) {
+          totalClaims = totalClaims + this._countClaimsDone;
+        }
+
+        this._totalClaims = totalClaims;
+      },
+
+      _getPercentages: function() {
+        var claimPercentages = [];
+
+        if (this._countClaimsOnSchedule) {
+          claimPercentages.push(this._computePercent(this._countClaimsOnSchedule, this._totalClaims));
+        }
+
+        if (this._countClaimsPastDue) {
+          claimPercentages.push(this._computePercent(this._countClaimsPastDue, this._totalClaims));
+        }
+
+        if (this._countClaimsDone) {
+          claimPercentages.push(this._computePercent(this._countClaimsDone, this._totalClaims));
+        }
+
+        var largestRemainder = document.createElement('nuxeo-util-largest-remainder');
+        largestRemainder.valuesToFix = claimPercentages;
+        return largestRemainder.computePercentages();
+      },
+
+      _debug: function(data) {
+        debugger;
+        return data;
+      }
+    });
+
+  </script>
+
+</dom-module>
