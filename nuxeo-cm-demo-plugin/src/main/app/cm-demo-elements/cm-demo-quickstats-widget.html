@@ -141,7 +141,7 @@ Custom property | Description | Default
           <div class="claim-progress-row">
             <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
             <div class="progress-bar-container">
-              <paper-progress value="[[_countClaimsDone]]" class="progress-done single-stat"></paper-progress>
+              <paper-progress value="[[_percentClaimsDone]]" class="progress-done single-stat"></paper-progress>
               <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
             </div>
           </div>
@@ -207,7 +207,7 @@ Custom property | Description | Default
         '_set_queryDoneClaims(claimKind)',
         '_setIncludeDoneClaims(claimState)',
         '_setMetrics(_countClaimsOnSchedule,_countClaimsPastDue)',
-        '_setMetrics(_countClaimsDone)'
+        '_setMetrics(_countClaimsDone)',
       ],
 
       // Generic query constraints used for all queries.
@@ -268,7 +268,7 @@ Custom property | Description | Default
       },
 
       _computePercent: function(numerator, denominator) {
-        return Math.round((numerator / denominator * 100));
+        return (numerator / denominator * 100);
       },
 
       // paper-progress bars are 200 pixels wide; I double the perfentace to get the width
@@ -286,37 +286,62 @@ Custom property | Description | Default
       },
 
       _setMetrics: function() {
-        this._totalClaims = 0;
+        this._setTotalClaims();
+
+        var fixedPercentages = this._getPercentages();
 
         if (this._countClaimsOnSchedule) {
-          this._totalClaims = this._totalClaims + this._countClaimsOnSchedule;
+          this._percentClaimsOnSchedule = fixedPercentages[0];
+        }
+        if (this._countClaimsPastDue) {
+          this._percentClaimsPastDue = fixedPercentages[1];
+        }
+        if (this._countClaimsDone) {
+          this._percentClaimsDone = fixedPercentages[2];
+        }
+      },
+
+      _setTotalClaims: function() {
+        var totalClaims = 0;
+
+        if (this._countClaimsOnSchedule) {
+          totalClaims = totalClaims + this._countClaimsOnSchedule;
         }
 
         if (this._countClaimsPastDue) {
-          this._totalClaims = this._totalClaims + this._countClaimsPastDue;
+          totalClaims = totalClaims + this._countClaimsPastDue;
         }
 
         if (this._countClaimsDone) {
-          this._totalClaims = this._totalClaims + this._countClaimsDone;
+          totalClaims = totalClaims + this._countClaimsDone;
         }
+
+        this._totalClaims = totalClaims;
+      },
+
+      _getPercentages: function() {
+        var claimPercentages = [];
 
         if (this._countClaimsOnSchedule) {
-          this._percentClaimsOnSchedule = this._computePercent(this._countClaimsOnSchedule, this._totalClaims);
+          claimPercentages.push(this._computePercent(this._countClaimsOnSchedule, this._totalClaims));
         }
+
         if (this._countClaimsPastDue) {
-          this._percentClaimsPastDue = this._computePercent(this._countClaimsPastDue, this._totalClaims);
+          claimPercentages.push(this._computePercent(this._countClaimsPastDue, this._totalClaims));
         }
 
         if (this._countClaimsDone) {
-          this._percentClaimsDone = this._computePercent(this._countClaimsDone, this._totalClaims);
+          claimPercentages.push(this._computePercent(this._countClaimsDone, this._totalClaims));
         }
 
-
+        var largestRemainder = document.createElement('nuxeo-util-largest-remainder');
+        largestRemainder.valuesToFix = claimPercentages;
+        return largestRemainder.computePercentages();
       },
 
       _debug: function(data) {
         debugger;
-        return true;
+        return data;
       }
     });
 
