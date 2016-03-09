@@ -1,11 +1,7 @@
 Manifest-Version: 1.0
-Bundle-SymbolicName: nuxeo-cm-demo-utils
-Bundle-Version: 7.1.qualifier
-Bundle-Name: nuxeo-cm-demo-utils
-Bundle-ClassPath: .
-Bundle-ActivationPolicy: lazy
-Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ManifestVersion: 1
+Bundle-Name: Nuxeo Case Management Demo Elements
+Bundle-SymbolicName: nuxeo-cm-demo-elements;singleton:=true
 Bundle-Vendor: Nuxeo
-Nuxeo-Component: OSGI-INF/cm.demo.operations.xml,OSGI-INF/cm.demo.works.xml
-
+Bundle-Version: 1.0.0
+Nuxeo-Component: OSGI-INF/authentication-contrib.xml
