@@ -24,3 +24,4 @@ target
 dependency-tree.log
 bower_components
 node_modules
+dist

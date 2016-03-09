@@ -47,7 +47,7 @@ var AUTOPREFIXER_BROWSERS = [
 ];
 
 var APP = 'app';
-var DIST = 'target/classes/nuxeo.war/cm-demo-elements';
+var DIST = 'dist';
 
 var pathIfPresent = function(root, subpath) {
   return !subpath ? root : path.join(root, subpath);
@@ -247,7 +247,7 @@ gulp.task('cache-config', function(callback) {
 
 // Clean output directory
 gulp.task('clean', function() {
-  return del(['.tmp', dist()]);
+  return del(['.tmp', dist()],{force: true});
 });
 
 // Watch files for changes & reload
