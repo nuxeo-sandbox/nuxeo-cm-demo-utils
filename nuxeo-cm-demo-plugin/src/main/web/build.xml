@@ -71,17 +71,4 @@
     </exec>
   </target>
 
-  <macrodef name="bower-fetch">
-    <attribute name="artifact" />
-    <attribute name="dir" default="bower_components" />
-    <sequential>
-      <echo message="Fetching @{artifact}" />
-      <exec executable="${cmd.mvn}" dir="../../.." failonerror="true">
-        <arg value="dependency:unpack" />
-        <arg value="-Dartifact=@{artifact}:zip" />
-        <arg value="-DoutputDirectory=src/main/yo/@{dir}" />
-      </exec>
-    </sequential>
-  </macrodef>
-
 </project>
