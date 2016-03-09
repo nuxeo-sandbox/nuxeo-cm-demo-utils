@@ -352,7 +352,7 @@ Custom property | Description | Default
           this.$.histogramProgressPastDue.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsPastDue) + "px");
         }
         if (this._countClaimsDone) {
-          this.$.histogramProgressDone.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsDone) + "px");
+          this.$$('#histogramProgressDone').setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsDone) + "px");
         }
       },
 
