@@ -1,32 +1,33 @@
 # About cm-demo-elements
 
-Polymer components for the Case Management demo.
+Polymer components for the Nuxeo Case Management demo.
 
 
-## Dependencies
+## Demo
 
-Install Node.js (I use [Homebrew](http://brew.sh/))
+You can run a standalone demo by following these steps...
+
+Install Node.js (I use [Homebrew](http://brew.sh/)).
 
 Element dependencies are managed via [Bower](http://bower.io/). You can install that via:
 
     npm install -g bower
 
-Then, go ahead and download the elements' dependencies:
+The demo runs using [Gulp](http://gulpjs.com/).  Install it via:
+
+    npm install -g gulp
+
+Install Node modules:
+
+    npm install
+
+Install Web depdencies:
 
     bower install
 
+Run the demo via:
 
-## Demo and Docs
-
-Use [Polyserve](https://github.com/PolymerLabs/polyserve). You can install it via:
-
-    npm install -g polyserve
-
-And you can run it via:
-
-    polyserve -p 3000
-
-Polyserve will provide a URL with which you can access the docs and demos.
+    gulp serve
 
 
 ## Reporting Issues
