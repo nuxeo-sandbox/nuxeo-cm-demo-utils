@@ -151,10 +151,10 @@ Custom property | Description | Default
 
         <div>Total Claims: [[_totalClaims]]</div>
         <div class="progress-histogram">
-          <paper-progress value="100" class="progress-on-schedule progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsOnSchedule)]];"></paper-progress>
-          <paper-progress value="100" class="progress-past-due progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsPastDue)]];"></paper-progress>
+          <paper-progress value="100" class="progress-on-schedule progress-hidden"></paper-progress>
+          <paper-progress value="100" class="progress-past-due progress-hidden"></paper-progress>
           <template is="dom-if" if="[[_includeDoneClaims]]">
-            <paper-progress value="100" class="progress-done progress-hidden" style="width: [[_convertPercentToProgressWidth(_percentClaimsDone)]];"></paper-progress>
+            <paper-progress value="100" class="progress-done progress-hidden"></paper-progress>
           </template>
         </div>
       </div>
