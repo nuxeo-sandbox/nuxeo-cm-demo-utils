@@ -46,7 +46,7 @@ var AUTOPREFIXER_BROWSERS = [
   'bb >= 10'
 ];
 
-var APP = 'src/main/app';
+var APP = 'app';
 var DIST = 'target/classes/nuxeo.war/cm-demo-elements';
 
 var pathIfPresent = function(root, subpath) {
@@ -157,7 +157,7 @@ gulp.task('copy', function() {
   }).pipe(gulp.dest(dist()));
 
   var bower = gulp.src([
-    'bower_components/**/*'
+    appl('bower_components/**/*')
   ]).pipe(gulp.dest(dist('bower_components')));
 
   var elements = gulp.src([appl('elements/**/*.html'),
