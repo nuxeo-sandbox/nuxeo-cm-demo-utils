@@ -6,9 +6,9 @@
     Do not put comments directely in the xhtml or you are gonna have trouble. Use c:if test="false" to add comment in xhtml code.
   </c:if>
 
-  <script src="#{baseURL}bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+  <h:outputScript src="/bower_components/webcomponentsjs/webcomponents-lite.js" target="" />
 
-  <link rel="import" href="#{baseURL}cm-demo-elements/elements/elements.vulcanized.html">
+  <nxr:import src="/cm-demo-elements/elements/elements.vulcanized.html" target="" />
 
   <template is="dom-bind">
     <nuxeo-connection url="/nuxeo"></nuxeo-connection>
