@@ -128,13 +128,13 @@
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
-    <!-- Very specific, for testing only -->
+    <!-- Very specific, for testing only
     <dependency>
       <groupId>nuxeo-studio</groupId>
       <artifactId>cm-showcase-nux</artifactId>
       <version>0.0.0-SNAPSHOT</version>
       <scope>test</scope>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.nuxeo.template.rendering</groupId>
       <artifactId>nuxeo-template-rendering-core</artifactId>
