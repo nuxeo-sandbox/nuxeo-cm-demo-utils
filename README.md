@@ -78,6 +78,15 @@ First build the [nuxeo-datademo](https://github.com/nuxeo-sandbox/nuxeo-datademo
 
 The plug-in will be placed at is in `nuxeo-cm-demo-mp/target/`, named nuxeo-cm-demo-utils-{version}.zip
 
+## Support
+
+**These features are not part of the Nuxeo Production platform.**
+
+These solutions are provided for inspiration and we encourage customers to use them as code samples and learning resources.
+
+This is a moving project (no API maintenance, no deprecation process, etc.) If any of these solutions are found to be useful for the Nuxeo Platform in general, they will be integrated directly into platform, not maintained here.
+
+
 ## Licensing
 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
