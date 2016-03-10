@@ -54,11 +54,19 @@ Custom property | Description | Default
         @apply(--cm-demo-quickstats-widget);
       }
 
-      paper-material.quick-stats {
-        --paper-material-header-color: #ffffff;
-        --paper-material-header: {
-          background: #236ba5;
-        }
+      .main-header {
+        color: #ffffff;
+        background: #236ba5;
+        font-size: 18px;
+        height: 18px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+      }
+
+      .main-content {
+        padding: 16px;
       }
 
       .claim-progress-row {
@@ -121,9 +129,9 @@ Custom property | Description | Default
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-material heading="Claims Progress" class="quick-stats">
-
-      <div class="card-content">
+    <paper-material>
+      <div class="main-header">Claims Progress</div>
+      <div class="main-content">
         <div class="claim-progress-row">
           <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
           <div class="progress-bar-container">
