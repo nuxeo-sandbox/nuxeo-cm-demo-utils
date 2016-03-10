@@ -1,29 +1,16 @@
-nuxeo-cm-demo-utils
-===================
+# About nuxeo-cm-demo-utils
 
 A plug-in for the Case Management demo (cm.cloud.nuxeo.com)
 
-## List of Features (details below)
-* [WeatherHistory](#weatherhistory), an example of calling an external WebService
-* [JavaScript Dashboard](#javascript-dashboard), for quick stats on cases
+## List of Features (Details below)
+
+* [Weather History](#weather-history), an example of calling an external WebService
+* [Polymer Dashboard](#polymer-dashboard), for quick stats on cases
 * [Update Demo Data](#update-demo-data), updates claim data to make it more recent
 
-## Build
 
-_Note_: You can also get the .zip of the market place package in the "Releases" part of this project (on GitHub)
+### Weather History
 
-_Other Note_: This project expects specific schemas to be implemented in your solution and depends on the Studio project deployed on cm.cloud.nuxeo.com => If you plan to use it (and not just look at the code) then make sure your own projects have the same schemas and fields (`InsuranceClaim` schema with expected lifecycle states, ...)
-
-Assuming maven is correctly setup on your computer:
-
-First build the [nuxeo-datademo](https://github.com/nuxeo-sandbox/nuxeo-datademo) plug-in.
-
-    cd /path/to/nuxeo-cm-demo-utils
-    mvn package
-
-The plug-in will be placed at is in `nuxeo-cm-demo-mp/target/`, named nuxeo-cm-demo-utils-{version}.zip
-
-## WeatherHistory
 This operation receives the name of a city and a date, and fills a specific
 field of the current document with weather informations.
 
@@ -52,28 +39,52 @@ WARNING and IMPORTANT
 
     => _The operation throws an error  if no keys are found_.
 
-## JavaScript Dashboard
-This dashboard displays quick stats about `InsuranceClaim` documents that are in the current `Queue`  document. It displays the stats by comparying the ìncl:due_date` field with the current date:
+
+### Polymer Dashboard
+
+This dashboard displays quick stats about `InsuranceClaim` documents that are in the current `Queue` document. It displays the stats by comparying the `ìncl:due_date` field with the current date:
 
 * "Past due": % of not-completed claims whose `due_date` > today
 * "on Schedule": % of not completed claims whose `due_date` >= today
-* "Done": % of completed claims (whatever the `due_date`
+* "Done": % of completed claims (whatever the `due_date`)
 
 **IMPORTANT #1**: The dashboard is displayed using a `.xhtml` widget template, which is displayed (in the Studio configuraiton) in a Tab, for a `Queue` document. It will work only in this context, since it is using fields of the current `Queue` document to query the claims.
 
-**IMPORTANT #2**: Because it uses "today", "now', make sure you have updated the demo data (see "Update Demo Data"), or you will have only "Past due" or "Completed" elements
+**IMPORTANT #2**: Because it uses "today", "now", make sure you have updated the demo data (see "Update Demo Data"), or you will have only "Past due" or "Completed" elements.
 
-The `.xhtml` file is very small, everything is done using JavaScript, in one REST call + Parsing of the result.
+The `.xhtml` file uses a Polymer element defined in the `nuxeo-cm-demo-elements` plug-in.
 
 
-## Update Demo Data
+### Update Demo Data
+
 The plug-in has a class (and an Operation, usable in Studio, which calls this class) which:
 
 * Updates all the existing claims: Change their creation date, creation user, modification info, due_date, etc., so the data looks recent. _WARNING_: Title and claim-id are changed, since it uses the date of the case and the code makes it more recent.
 * Creates a claim with more information, and updates its lifecycle state to `DecisionMade`, so it is usable with the Template Rendering plug-in.
 
+
+## Build
+
+[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=Sandbox/sandbox_nuxeo-cm-demo-utils-master)](https://qa.nuxeo.org/jenkins/view/sandbox/job/Sandbox/job/sandbox_nuxeo-cm-demo-utils-master/)
+
+_Note_: This project expects specific schemas to be implemented in your solution and depends on the Studio project deployed on cm.cloud.nuxeo.com => If you plan to use it (and not just look at the code) then make sure your own projects have the same schemas and fields (`InsuranceClaim` schema with expected lifecycle states, ...)
+
+Assuming maven is correctly setup on your computer:
+
+First build the [nuxeo-datademo](https://github.com/nuxeo-sandbox/nuxeo-datademo) plug-in. Then build the `nuxeo-cm-demo-utils` package.
+
+    cd /path/to/nuxeo-cm-demo-utils
+    mvn package
+
+The plug-in will be placed at is in `nuxeo-cm-demo-mp/target/`, named nuxeo-cm-demo-utils-{version}.zip
+
+## Licensing
+
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+
 ## About Nuxeo
 
-Nuxeo provides a modular, extensible Java-based [open source software platform for enterprise content management](http://www.nuxeo.com/en/products/ep) and packaged applications for [document management](http://www.nuxeo.com/en/products/document-management), [digital asset management](http://www.nuxeo.com/en/products/dam) and [case management](http://www.nuxeo.com/en/products/case-management). Designed by developers for developers, the Nuxeo platform offers a modern architecture, a powerful plug-in model and extensive packaging capabilities for building content applications.
+Nuxeo dramatically improves how content-based applications are built, managed and deployed, making customers more agile, innovative and successful. Nuxeo provides a next generation, enterprise ready platform for building traditional and cutting-edge content oriented applications. Combining a powerful application development environment with SaaS-based tools and a modular architecture, the Nuxeo Platform and Products provide clear business value to some of the most recognizable brands including Verizon, Electronic Arts, Netflix, Sharp, FICO, the U.S. Navy, and Boeing. Nuxeo is headquartered in New York and Paris.
 
-More information on: <http://www.nuxeo.com/>
+More information is available at [www.nuxeo.com](http://www.nuxeo.com).
