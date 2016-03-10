@@ -284,7 +284,6 @@ gulp.task('serve', ['styles', 'elements', 'images'], function() {
   gulp.watch([appl('styles/**/*.css')], ['styles', reload]);
   gulp.watch([appl('elements/**/*.css')], ['elements', reload]);
   gulp.watch([appl('elements/**/*.html')], ['elements', reload]);
-  gulp.watch([appl('{scripts,elements}/**/{*.js,*.html}')], ['lint']);
   gulp.watch([appl('images/**/*')], reload);
 });
 
