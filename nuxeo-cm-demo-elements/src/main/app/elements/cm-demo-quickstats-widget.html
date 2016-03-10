@@ -18,7 +18,7 @@ Contributors:
   Joshua Fletcher <jfletcher@nuxeo.com>
 -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
@@ -51,14 +51,29 @@ Custom property | Description | Default
 
     <style>
       :host {
+        line-height: initial;
         @apply(--cm-demo-quickstats-widget);
       }
 
-      paper-card.quick-stats {
-        --paper-card-header-color: #ffffff;
-        --paper-card-header: {
-          background: #236ba5;
-        }
+      paper-material {
+        border-radius: 3px;
+        display: inline-block;
+      }
+
+      .main-header {
+        color: #ffffff;
+        background: #236ba5;
+        font-size: 18px;
+        padding-left: 16px;
+        padding-right: 16px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+      }
+
+      .main-content {
+        padding: 16px;
       }
 
       .claim-progress-row {
@@ -121,9 +136,9 @@ Custom property | Description | Default
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-card heading="Claims Progress" class="quick-stats">
-
-      <div class="card-content">
+    <paper-material elevation="2">
+      <div class="main-header">Claims Progress</div>
+      <div class="main-content">
         <div class="claim-progress-row">
           <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
           <div class="progress-bar-container">
@@ -159,7 +174,7 @@ Custom property | Description | Default
         </div>
       </div>
 
-    </paper-card>
+    </paper-material>
 
   </template>
 
