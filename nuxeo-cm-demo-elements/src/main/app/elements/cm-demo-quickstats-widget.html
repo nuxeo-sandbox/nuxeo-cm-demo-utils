@@ -18,7 +18,7 @@ Contributors:
   Joshua Fletcher <jfletcher@nuxeo.com>
 -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-connection.html">
 <link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
@@ -54,9 +54,9 @@ Custom property | Description | Default
         @apply(--cm-demo-quickstats-widget);
       }
 
-      paper-card.quick-stats {
-        --paper-card-header-color: #ffffff;
-        --paper-card-header: {
+      paper-material.quick-stats {
+        --paper-material-header-color: #ffffff;
+        --paper-material-header: {
           background: #236ba5;
         }
       }
@@ -121,7 +121,7 @@ Custom property | Description | Default
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-card heading="Claims Progress" class="quick-stats">
+    <paper-material heading="Claims Progress" class="quick-stats">
 
       <div class="card-content">
         <div class="claim-progress-row">
@@ -159,7 +159,7 @@ Custom property | Description | Default
         </div>
       </div>
 
-    </paper-card>
+    </paper-material>
 
   </template>
 
