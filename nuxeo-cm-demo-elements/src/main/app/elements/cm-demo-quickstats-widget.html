@@ -54,15 +54,20 @@ Custom property | Description | Default
         @apply(--cm-demo-quickstats-widget);
       }
 
+      paper-material {
+        border-radius: 3px;
+      }
+
       .main-header {
         color: #ffffff;
         background: #236ba5;
         font-size: 18px;
-        height: 18px;
         padding-left: 16px;
         padding-right: 16px;
         padding-top: 8px;
         padding-bottom: 8px;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
       }
 
       .main-content {
@@ -129,7 +134,7 @@ Custom property | Description | Default
       <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-material>
+    <paper-material elevation="2">
       <div class="main-header">Claims Progress</div>
       <div class="main-content">
         <div class="claim-progress-row">
