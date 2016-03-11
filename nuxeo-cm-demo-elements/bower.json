@@ -20,6 +20,6 @@
     "polymer": "Polymer/polymer#^1.1.4",
     "nuxeo-elements": "nuxeo/nuxeo-elements#b14c260342fc44ead950ab5eb934f861f78dad11",
     "paper-elements": "PolymerElements/paper-elements#^1.0.5",
-    "nuxeo-labs-elements": "nuxeo-sandbox/nuxeo-labs-elements"
+    "nuxeo-util-elements": "nuxeo-sandbox/nuxeo-util-elements#^1.0.1"
   }
 }
