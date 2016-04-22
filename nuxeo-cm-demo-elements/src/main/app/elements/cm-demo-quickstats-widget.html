@@ -64,7 +64,7 @@ Custom property | Description | Default
       nuxeo-labs-percentage-chart::content {
         --percentage-chart-bar-2-color: #109618;
       }
-      
+
       paper-material {
         border-radius: 3px;
         display: inline-block;
@@ -155,56 +155,10 @@ Custom property | Description | Default
           results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-material elevation="2">
-      <div class="main-header">Claims Progress</div>
-      <div class="main-content">
-        <div class="claim-progress-row">
-          <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
-          <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsOnSchedule]]"
-                class="progress-on-schedule single-stat"></paper-progress>
-            <div class="progress-percent-label">[[_percentClaimsOnSchedule]]%</div>
-          </div>
-        </div>
-        <div class="claim-progress-row">
-          <div>Past Due <span class="count-single-stat">[[_countClaimsPastDue]] Claims</span></div>
-          <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsPastDue]]"
-                class="progress-past-due single-stat"></paper-progress>
-            <div class="progress-percent-label">[[_percentClaimsPastDue]]%</div>
-          </div>
-        </div>
-
-        <template is="dom-if"
-            if="[[_includeDoneClaims]]">
-          <div class="claim-progress-row">
-            <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
-            <div class="progress-bar-container">
-              <paper-progress value="[[_percentClaimsDone]]"
-                  class="progress-done single-stat"></paper-progress>
-              <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
-            </div>
-          </div>
-        </template>
-
-        <div>Total Claims: [[_totalClaims]]</div>
-        <div class="progress-histogram">
-          <paper-progress id="histogramProgressOnSchedule"
-              value="100"
-              class="progress-on-schedule progress-hidden"></paper-progress>
-          <paper-progress id="histogramProgressPastDue"
-              value="100"
-              class="progress-past-due progress-hidden"></paper-progress>
-          <template is="dom-if"
-              if="[[_includeDoneClaims]]">
-            <paper-progress id="histogramProgressDone"
-                value="100"
-                class="progress-done progress-hidden"></paper-progress>
-          </template>
-        </div>
-      </div>
-
-    </paper-material>
+    <nuxeo-labs-percentage-chart title="Claim Status"
+        data-type="Claims"
+        data="[[_claimChartData]]">
+    </nuxeo-labs-percentage-chart>
 
   </template>
 
@@ -243,6 +197,9 @@ Custom property | Description | Default
         _includeDoneClaims: {
           type: Boolean,
           value: true
+        },
+        _claimChartData: {
+          type: Array
         }
       },
 
