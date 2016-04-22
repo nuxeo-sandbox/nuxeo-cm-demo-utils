@@ -17,12 +17,14 @@ limitations under the License.
 Contributors:
   Joshua Fletcher <jfletcher@nuxeo.com>
 -->
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-material/paper-material.html">
-<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
-<link rel="import" href="../bower_components/nuxeo-elements/nuxeo-connection.html">
-<link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
-<link rel="import" href="../bower_components/nuxeo-util-elements/nuxeo-util-largest-remainder.html">
+<link rel="import"
+    href="../bower_components/polymer/polymer.html">
+<link rel="import"
+    href="../bower_components/nuxeo-elements/nuxeo-connection.html">
+<link rel="import"
+    href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+<link rel="import"
+    href="../bower_components/nuxeo-labs-elements/nuxeo-labs-charts/nuxeo-labs-percentage-chart.html">
 <!--
 An element for displaying the progress of claims in the CM demo.
 
@@ -55,126 +57,38 @@ Custom property | Description | Default
         @apply(--cm-demo-quickstats-widget);
       }
 
-      paper-material {
-        border-radius: 3px;
-        display: inline-block;
+      nuxeo-labs-percentage-chart::content {
+        --percentage-chart-header-color: #236ba5;
+        --percentage-chart-bar-0-color: #00a300;
+        --percentage-chart-bar-1-color: #cc0000;
+        --percentage-chart-bar-2-color: #00bcad;
       }
-
-      .main-header {
-        color: #ffffff;
-        background: #236ba5;
-        font-size: 18px;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        border-top-left-radius: 3px;
-        border-top-right-radius: 3px;
-      }
-
-      .main-content {
-        padding: 16px;
-      }
-
-      .claim-progress-row {
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .progress-bar-container {
-        display: table;
-      }
-
-      .progress-percent-label {
-        padding-left: 5px;
-        font-size: smaller;
-        display: table-cell;
-        vertical-align: middle;
-      }
-
-      paper-progress.single-stat {
-        --paper-progress-height: 20px;
-        display: table-cell;
-        vertical-align: middle;
-      }
-
-      .progress-on-schedule {
-        --paper-progress-active-color: #00a300;
-      }
-
-      .progress-past-due {
-        --paper-progress-active-color: #cc0000;
-      }
-
-      .progress-done {
-        --paper-progress-active-color: #00bcad;
-      }
-
-      .progress-hidden {
-        width: 0;
-      }
-
-      .progress-histogram {
-        display: inline-flex;
-      }
-
-      .count-single-stat {
-        color: #545454;
-        font-size: x-small;
-      }
-
     </style>
 
     <nuxeo-connection></nuxeo-connection>
-    <!-- Get claims on schedule claims. -->
-    <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
-    <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
+    <!-- Get claims on schedule and past due. -->
+    <nuxeo-page-provider auto
+        query="[[_queryOnScheduleClaims]]"
+        page-size="1"
+        results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto
+        query="[[_queryPastDueClaims]]"
+        page-size="1"
+        results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
 
     <!-- Get completed claims. -->
-    <template is="dom-if" if="[[_includeDoneClaims]]">
-      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
+    <template is="dom-if"
+        if="[[_includeDoneClaims]]">
+      <nuxeo-page-provider auto
+          query="[[_queryDoneClaims]]"
+          page-size="1"
+          results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
-    <paper-material elevation="2">
-      <div class="main-header">Claims Progress</div>
-      <div class="main-content">
-        <div class="claim-progress-row">
-          <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
-          <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single-stat"></paper-progress>
-            <div class="progress-percent-label">[[_percentClaimsOnSchedule]]%</div>
-          </div>
-        </div>
-        <div class="claim-progress-row">
-          <div>Past Due <span class="count-single-stat">[[_countClaimsPastDue]] Claims</span></div>
-          <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single-stat"></paper-progress>
-            <div class="progress-percent-label">[[_percentClaimsPastDue]]%</div>
-          </div>
-        </div>
-
-        <template is="dom-if" if="[[_includeDoneClaims]]">
-          <div class="claim-progress-row">
-            <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
-            <div class="progress-bar-container">
-              <paper-progress value="[[_percentClaimsDone]]" class="progress-done single-stat"></paper-progress>
-              <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
-            </div>
-          </div>
-        </template>
-
-        <div>Total Claims: [[_totalClaims]]</div>
-        <div class="progress-histogram">
-          <paper-progress id="histogramProgressOnSchedule" value="100" class="progress-on-schedule progress-hidden"></paper-progress>
-          <paper-progress id="histogramProgressPastDue" value="100" class="progress-past-due progress-hidden"></paper-progress>
-          <template is="dom-if" if="[[_includeDoneClaims]]">
-            <paper-progress id="histogramProgressDone" value="100" class="progress-done progress-hidden"></paper-progress>
-          </template>
-        </div>
-      </div>
-
-    </paper-material>
+    <nuxeo-labs-percentage-chart title="Claim Status"
+        data-type="Claims"
+        data="[[_claimChartData]]">
+    </nuxeo-labs-percentage-chart>
 
   </template>
 
@@ -198,21 +112,12 @@ Custom property | Description | Default
         _queryDoneClaims: {
           type: String
         },
-        _percentClaimsOnSchedule: {
-          type: Number
-        },
-        _percentClaimsPastDue: {
-          type: Number
-        },
-        _percentClaimsDone: {
-          type: Number
-        },
-        _totalClaims: {
-          type: Number
-        },
         _includeDoneClaims: {
           type: Boolean,
           value: true
+        },
+        _claimChartData: {
+          type: Array
         }
       },
 
@@ -280,20 +185,6 @@ Custom property | Description | Default
         this._queryDoneClaims = this._queryGenericFilter() + " AND ecm:currentLifeCycleState = 'DecisionMade'"
       },
 
-      _computTotal: function(param1, param2) {
-        return param1 + param2;
-      },
-
-      _computePercent: function(numerator, denominator) {
-        return (numerator / denominator * 100);
-      },
-
-      // paper-progress bars are 200 pixels wide; I double the percentage to get the width
-      // so that the 3 bars fit in the default space.
-      _convertPercentToProgressWidth: function(percentage) {
-        return percentage * 2;
-      },
-
       _setIncludeDoneClaims: function() {
         if (this.claimState) {
           this._includeDoneClaims = false;
@@ -303,72 +194,28 @@ Custom property | Description | Default
       },
 
       _setMetrics: function() {
-        this._setTotalClaims();
-
-        var fixedPercentages = this._getPercentages();
+        var claimChartData = [];
 
         if (this._countClaimsOnSchedule) {
-          this._percentClaimsOnSchedule = fixedPercentages[0];
+          claimChartData.push({
+            'label': 'On Schedule',
+            'value': this._countClaimsOnSchedule
+          });
         }
         if (this._countClaimsPastDue) {
-          this._percentClaimsPastDue = fixedPercentages[1];
+          claimChartData.push({
+            'label': 'Past Due',
+            'value': this._countClaimsPastDue
+          });
         }
         if (this._countClaimsDone) {
-          this._percentClaimsDone = fixedPercentages[2];
+          claimChartData.push({
+            'label': 'Done',
+            'value': this._countClaimsDone
+          });
         }
 
-        this._setHistogramBarWidths();
-      },
-
-      _setTotalClaims: function() {
-        var totalClaims = 0;
-
-        if (this._countClaimsOnSchedule) {
-          totalClaims = totalClaims + this._countClaimsOnSchedule;
-        }
-
-        if (this._countClaimsPastDue) {
-          totalClaims = totalClaims + this._countClaimsPastDue;
-        }
-
-        if (this._countClaimsDone) {
-          totalClaims = totalClaims + this._countClaimsDone;
-        }
-
-        this._totalClaims = totalClaims;
-      },
-
-      _getPercentages: function() {
-        var claimPercentages = [];
-
-        if (this._countClaimsOnSchedule) {
-          claimPercentages.push(this._computePercent(this._countClaimsOnSchedule, this._totalClaims));
-        }
-
-        if (this._countClaimsPastDue) {
-          claimPercentages.push(this._computePercent(this._countClaimsPastDue, this._totalClaims));
-        }
-
-        if (this._countClaimsDone) {
-          claimPercentages.push(this._computePercent(this._countClaimsDone, this._totalClaims));
-        }
-
-        var largestRemainder = document.createElement('nuxeo-util-largest-remainder');
-        largestRemainder.valuesToFix = claimPercentages;
-        return largestRemainder.computePercentages();
-      },
-
-      // Set the width of the bars in the histogram.
-      _setHistogramBarWidths: function() {
-        if (this._countClaimsOnSchedule) {
-          this.$.histogramProgressOnSchedule.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsOnSchedule) + "px");
-        }
-        if (this._countClaimsPastDue) {
-          this.$.histogramProgressPastDue.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsPastDue) + "px");
-        }
-        if (this._countClaimsDone) {
-          this.$$('#histogramProgressDone').setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsDone) + "px");
-        }
+        this._claimChartData = claimChartData;
       },
 
       _debug: function(data) {
@@ -376,7 +223,6 @@ Custom property | Description | Default
         return data;
       }
     });
-
   </script>
 
 </dom-module>
