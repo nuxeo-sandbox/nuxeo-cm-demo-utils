@@ -182,15 +182,6 @@ Custom property | Description | Default
         _queryDoneClaims: {
           type: String
         },
-        _percentClaimsOnSchedule: {
-          type: Number
-        },
-        _percentClaimsPastDue: {
-          type: Number
-        },
-        _percentClaimsDone: {
-          type: Number
-        },
         _totalClaims: {
           type: Number
         },
@@ -267,20 +258,6 @@ Custom property | Description | Default
         this._queryDoneClaims = this._queryGenericFilter() + " AND ecm:currentLifeCycleState = 'DecisionMade'"
       },
 
-      _computTotal: function(param1, param2) {
-        return param1 + param2;
-      },
-
-      _computePercent: function(numerator, denominator) {
-        return (numerator / denominator * 100);
-      },
-
-      // paper-progress bars are 200 pixels wide; I double the percentage to get the width
-      // so that the 3 bars fit in the default space.
-      _convertPercentToProgressWidth: function(percentage) {
-        return percentage * 2;
-      },
-
       _setIncludeDoneClaims: function() {
         if (this.claimState) {
           this._includeDoneClaims = false;
@@ -290,72 +267,28 @@ Custom property | Description | Default
       },
 
       _setMetrics: function() {
-        this._setTotalClaims();
-
-        var fixedPercentages = this._getPercentages();
+        var claimChartData = [];
 
         if (this._countClaimsOnSchedule) {
-          this._percentClaimsOnSchedule = fixedPercentages[0];
+          claimChartData.push({
+            'label': 'On Schedule',
+            'value': this._countClaimsOnSchedule
+          });
         }
         if (this._countClaimsPastDue) {
-          this._percentClaimsPastDue = fixedPercentages[1];
+          claimChartData.push({
+            'label': 'Past Due',
+            'value': this._countClaimsPastDue
+          });
         }
         if (this._countClaimsDone) {
-          this._percentClaimsDone = fixedPercentages[2];
+          claimChartData.push({
+            'label': 'Done',
+            'value': this._countClaimsDone
+          });
         }
 
-        this._setHistogramBarWidths();
-      },
-
-      _setTotalClaims: function() {
-        var totalClaims = 0;
-
-        if (this._countClaimsOnSchedule) {
-          totalClaims = totalClaims + this._countClaimsOnSchedule;
-        }
-
-        if (this._countClaimsPastDue) {
-          totalClaims = totalClaims + this._countClaimsPastDue;
-        }
-
-        if (this._countClaimsDone) {
-          totalClaims = totalClaims + this._countClaimsDone;
-        }
-
-        this._totalClaims = totalClaims;
-      },
-
-      _getPercentages: function() {
-        var claimPercentages = [];
-
-        if (this._countClaimsOnSchedule) {
-          claimPercentages.push(this._computePercent(this._countClaimsOnSchedule, this._totalClaims));
-        }
-
-        if (this._countClaimsPastDue) {
-          claimPercentages.push(this._computePercent(this._countClaimsPastDue, this._totalClaims));
-        }
-
-        if (this._countClaimsDone) {
-          claimPercentages.push(this._computePercent(this._countClaimsDone, this._totalClaims));
-        }
-
-        var largestRemainder = document.createElement('nuxeo-util-largest-remainder');
-        largestRemainder.valuesToFix = claimPercentages;
-        return largestRemainder.computePercentages();
-      },
-
-      // Set the width of the bars in the histogram.
-      _setHistogramBarWidths: function() {
-        if (this._countClaimsOnSchedule) {
-          this.$.histogramProgressOnSchedule.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsOnSchedule) + "px");
-        }
-        if (this._countClaimsPastDue) {
-          this.$.histogramProgressPastDue.setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsPastDue) + "px");
-        }
-        if (this._countClaimsDone) {
-          this.$$('#histogramProgressDone').setAttribute("style", "width: " + this._convertPercentToProgressWidth(this._percentClaimsDone) + "px");
-        }
+        this._claimChartData = claimChartData;
       },
 
       _debug: function(data) {
