@@ -127,7 +127,7 @@ Custom property | Description | Default
     </style>
 
     <nuxeo-connection></nuxeo-connection>
-    <!-- Get claims on schedule claims. -->
+    <!-- Get claims on schedule and past due. -->
     <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
     <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
 
