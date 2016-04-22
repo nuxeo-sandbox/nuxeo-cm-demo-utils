@@ -51,7 +51,7 @@
         <arg value="install" />
       </exec>
       <exec executable="${cmd.bower}" failonerror="true">
-        <arg value="udpate" />
+        <arg value="update" />
       </exec>
     </target>
 
