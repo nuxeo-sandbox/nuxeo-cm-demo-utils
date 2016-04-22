@@ -17,12 +17,18 @@ limitations under the License.
 Contributors:
   Joshua Fletcher <jfletcher@nuxeo.com>
 -->
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/paper-material/paper-material.html">
-<link rel="import" href="../bower_components/paper-progress/paper-progress.html">
-<link rel="import" href="../bower_components/nuxeo-elements/nuxeo-connection.html">
-<link rel="import" href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
-<link rel="import" href="../bower_components/nuxeo-util-elements/nuxeo-util-largest-remainder.html">
+<link rel="import"
+    href="../bower_components/polymer/polymer.html">
+<link rel="import"
+    href="../bower_components/paper-material/paper-material.html">
+<link rel="import"
+    href="../bower_components/paper-progress/paper-progress.html">
+<link rel="import"
+    href="../bower_components/nuxeo-elements/nuxeo-connection.html">
+<link rel="import"
+    href="../bower_components/nuxeo-elements/nuxeo-page-provider.html">
+<link rel="import"
+    href="../bower_components/nuxeo-util-elements/nuxeo-util-largest-remainder.html">
 <!--
 An element for displaying the progress of claims in the CM demo.
 
@@ -123,17 +129,26 @@ Custom property | Description | Default
         color: #545454;
         font-size: x-small;
       }
-
     </style>
 
     <nuxeo-connection></nuxeo-connection>
     <!-- Get claims on schedule and past due. -->
-    <nuxeo-page-provider auto query="[[_queryOnScheduleClaims]]" page-size="1" results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
-    <nuxeo-page-provider auto query="[[_queryPastDueClaims]]" page-size="1" results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto
+        query="[[_queryOnScheduleClaims]]"
+        page-size="1"
+        results-count="{{_countClaimsOnSchedule}}"></nuxeo-page-provider>
+    <nuxeo-page-provider auto
+        query="[[_queryPastDueClaims]]"
+        page-size="1"
+        results-count="{{_countClaimsPastDue}}"></nuxeo-page-provider>
 
     <!-- Get completed claims. -->
-    <template is="dom-if" if="[[_includeDoneClaims]]">
-      <nuxeo-page-provider auto query="[[_queryDoneClaims]]" page-size="1" results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
+    <template is="dom-if"
+        if="[[_includeDoneClaims]]">
+      <nuxeo-page-provider auto
+          query="[[_queryDoneClaims]]"
+          page-size="1"
+          results-count="{{_countClaimsDone}}"></nuxeo-page-provider>
     </template>
 
     <paper-material elevation="2">
@@ -142,23 +157,27 @@ Custom property | Description | Default
         <div class="claim-progress-row">
           <div>On Schedule <span class="count-single-stat">[[_countClaimsOnSchedule]] Claims</span></div>
           <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsOnSchedule]]" class="progress-on-schedule single-stat"></paper-progress>
+            <paper-progress value="[[_percentClaimsOnSchedule]]"
+                class="progress-on-schedule single-stat"></paper-progress>
             <div class="progress-percent-label">[[_percentClaimsOnSchedule]]%</div>
           </div>
         </div>
         <div class="claim-progress-row">
           <div>Past Due <span class="count-single-stat">[[_countClaimsPastDue]] Claims</span></div>
           <div class="progress-bar-container">
-            <paper-progress value="[[_percentClaimsPastDue]]" class="progress-past-due single-stat"></paper-progress>
+            <paper-progress value="[[_percentClaimsPastDue]]"
+                class="progress-past-due single-stat"></paper-progress>
             <div class="progress-percent-label">[[_percentClaimsPastDue]]%</div>
           </div>
         </div>
 
-        <template is="dom-if" if="[[_includeDoneClaims]]">
+        <template is="dom-if"
+            if="[[_includeDoneClaims]]">
           <div class="claim-progress-row">
             <div>Done <span class="count-single-stat">[[_countClaimsDone]] Claims</span></div>
             <div class="progress-bar-container">
-              <paper-progress value="[[_percentClaimsDone]]" class="progress-done single-stat"></paper-progress>
+              <paper-progress value="[[_percentClaimsDone]]"
+                  class="progress-done single-stat"></paper-progress>
               <div class="progress-percent-label">[[_percentClaimsDone]]%</div>
             </div>
           </div>
@@ -166,10 +185,17 @@ Custom property | Description | Default
 
         <div>Total Claims: [[_totalClaims]]</div>
         <div class="progress-histogram">
-          <paper-progress id="histogramProgressOnSchedule" value="100" class="progress-on-schedule progress-hidden"></paper-progress>
-          <paper-progress id="histogramProgressPastDue" value="100" class="progress-past-due progress-hidden"></paper-progress>
-          <template is="dom-if" if="[[_includeDoneClaims]]">
-            <paper-progress id="histogramProgressDone" value="100" class="progress-done progress-hidden"></paper-progress>
+          <paper-progress id="histogramProgressOnSchedule"
+              value="100"
+              class="progress-on-schedule progress-hidden"></paper-progress>
+          <paper-progress id="histogramProgressPastDue"
+              value="100"
+              class="progress-past-due progress-hidden"></paper-progress>
+          <template is="dom-if"
+              if="[[_includeDoneClaims]]">
+            <paper-progress id="histogramProgressDone"
+                value="100"
+                class="progress-done progress-hidden"></paper-progress>
           </template>
         </div>
       </div>
@@ -376,7 +402,6 @@ Custom property | Description | Default
         return data;
       }
     });
-
   </script>
 
 </dom-module>
