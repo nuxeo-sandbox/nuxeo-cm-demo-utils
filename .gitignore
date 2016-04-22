@@ -24,3 +24,5 @@ target
 dependency-tree.log
 bower_components
 node_modules
+
+nuxeo-cm-demo-elements/src/main/app/index_local.html
