@@ -16,8 +16,9 @@
     <platform>cap-@VERSION@</platform>
     <platform>cap-7.4</platform>
     <platform>cap-7.10</platform>
+    <platform>cap-8.2</platform>
   </platforms>
-  <!-- 
+  <!--
   <dependencies>
     <package>nuxeo-adullact-service:@VERSION@</package>
   </dependencies>
