@@ -112,6 +112,26 @@ public class UpdateDemoData {
 
     static private final int kCITIES_MAX = kCITIES.length - 1;
 
+    static private final String[] kCOUNTRIES = {
+            "US", "US", "US", "US", "US",
+            "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB",
+            "FR", "FR", "FR", "FR", "FR", "FR",
+            "ES", "ES", "ES",
+            "IT", "IT",
+            "DE", "DE", "DE", "DE", "DE", "DE", "DE", "DE",
+            "CH",
+            "AT",
+            "GR",
+            "PT",
+            "IS",
+            "NO", "NO",
+            "SE", "SE",
+            "PL",
+            "IE"
+    };
+
+    static private final int kCOUNTRIES_MAX = kCOUNTRIES.length - 1;
+
     // Based on "AccidentTypologie" vocabulary
     static private final String[] ACC_TYPOLOGY = { "City/Parking", "City/Parking", "City/Parking", "City/Parking",
             "City/Parking", "City/Crossroads", "City/Crossroads", "City/Crossroads", "City/Avenue",
@@ -424,6 +444,10 @@ public class UpdateDemoData {
             String city = kCITIES[_randomInt(0, kCITIES_MAX)];
             oneDoc.setPropertyValue("incl:incident_city", city);
             oneDoc.setPropertyValue("incl:incident_us_state", citiesAndStates.get(city));
+
+            // Yes the country is totally random and does not match the city or state; it's just a demo! :)
+            String country = kCOUNTRIES[_randomInt(0, kCOUNTRIES_MAX)];
+            oneDoc.setPropertyValue("incl:incident_country", country);
 
             if (hasAccidentTypology) {
                 String kind = (String) oneDoc.getPropertyValue("incl:incident_kind");
