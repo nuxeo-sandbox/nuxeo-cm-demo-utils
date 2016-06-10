@@ -112,7 +112,23 @@ public class UpdateDemoData {
 
     static private final int kCITIES_MAX = kCITIES.length - 1;
 
-    static private final String[] kCOUNTRIES = { "US", "GB", "GB", "GB", "FR", "ES", "IT", "DE", "CH", "AT", "GR", "PT", "IS", "NO", "SE", "PL", "IE" };
+    static private final String[] kCOUNTRIES = {
+            "US", "US", "US", "US", "US",
+            "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB", "GB",
+            "FR", "FR", "FR", "FR", "FR", "FR",
+            "ES", "ES", "ES",
+            "IT", "IT",
+            "DE", "DE", "DE", "DE", "DE", "DE", "DE", "DE",
+            "CH",
+            "AT",
+            "GR",
+            "PT",
+            "IS",
+            "NO", "NO",
+            "SE", "SE",
+            "PL",
+            "IE"
+    };
 
     static private final int kCOUNTRIES_MAX = kCOUNTRIES.length - 1;
 
